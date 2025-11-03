@@ -31,3 +31,19 @@ Useful Gradle tasks and flags:
 
 Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
 For example, `core:clean` removes `build` folder only from the `core` project.
+
+### Instalation de gradle et git pull
+- **Java JDK 17+**
+
+```bash
+sudo apt update
+sudo apt install openjdk-17-jdk
+```
+
+- **Gradle** installé globalement en local
+
+```bash
+sudo apt install gradle
+```
+
+- **OpenGL** seulement si la fenetre ne s'ouvre pas après avoir pull le repo
