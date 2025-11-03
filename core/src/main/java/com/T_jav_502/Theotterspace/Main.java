@@ -1,32 +1,73 @@
 package com.T_jav_502.Theotterspace;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys; // NOUVEL IMPORT pour Gdx.input
+import com.badlogic.gdx.graphics.GL20; // NOUVEL IMPORT pour Gdx.gl.glClear
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite; // NOUVEL IMPORT
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
+/**
+ * @jllink com.badlogic.gdx.ApplicationListener implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
+
     private SpriteBatch batch;
-    private Texture image;
+    private Texture loutreTexture;
+    private Sprite loutreSprite;
+    private float VITESSE_LOUTRE = 200f;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
-        image = new Texture("libgdx.png");
+
+        loutreTexture = new Texture(Gdx.files.internal("loutrespacemarine.png"));
+        loutreSprite = new Sprite(loutreTexture);
+
+        loutreSprite.setSize(128f, 128f);
+
+        loutreSprite.setPosition(0, 0); // Position de départ
+
     }
 
     @Override
     public void render() {
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
+
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        float deplacement = VITESSE_LOUTRE * deltaTime;
+
+        float x = loutreSprite.getX();
+        float y = loutreSprite.getY();
+
+        if (Gdx.input.isKeyPressed(Keys.W)) {
+            y += deplacement;
+        }
+
+        if (Gdx.input.isKeyPressed(Keys.S)) {
+            y -= deplacement;
+        }
+
+        if (Gdx.input.isKeyPressed(Keys.A)) {
+            x -= deplacement;
+        }
+
+        if (Gdx.input.isKeyPressed(Keys.D)) {
+            x += deplacement;
+        }
+
+        loutreSprite.setPosition(x, y);
+
+        Gdx.gl.glClearColor(0.1f, 0.2f, 0.1f, 1f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         batch.begin();
-        batch.draw(image, 140, 210);
+        loutreSprite.draw(batch);
         batch.end();
     }
 
     @Override
     public void dispose() {
         batch.dispose();
-        image.dispose();
+        loutreTexture.dispose();
     }
 }
