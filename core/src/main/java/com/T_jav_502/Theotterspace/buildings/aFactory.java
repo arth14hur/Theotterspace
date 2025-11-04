@@ -4,7 +4,7 @@ import com.T_jav_502.Theotterspace.tiles.aTile;
 import com.T_jav_502.Theotterspace.teams.*;
 
 public abstract class aFactory extends aBuilding{
-    public aFactory(aTile tile , Team owner ) {
+    public aFactory(aTile tile , Team.Species owner ) {
         super(tile , owner , 50);
     }
     //To Do
