@@ -1,0 +1,62 @@
+package com.T_jav_502.Theotterspace.buildings;
+import com.T_jav_502.Theotterspace.Teams;
+import com.T_jav_502.Theotterspace.Tiles;
+public abstract class aBuilding {
+    protected aTile tile ;
+    protected Team owner ;
+    protected int hp ;
+
+    public aBuilding (aTile tile , Team team , int hp) {
+        this.tile = tile;
+        this.owner = team;
+        this.hp = hp;
+    }
+    //return the curent tile
+    public aTile getTile() {
+        return tile;
+    }
+    //return the curent Team
+    public Team getTeam() {
+        return owner;
+    }
+    //return the curent hp
+    public int getHp() {
+        return hp;
+    }
+    //Change the building's HP depending on whether the tile is occupied by an enemy team or not.
+    //If the tile is not occupied, the building heal 5 hp.
+    //If the space is occupied, we check if the unit is allied.
+    //If allied the building Heal 10hp.
+    //Else the building loos 10hp and if the hp fall to 0 or less the building change owner and get 50hp.
+    //the building don't have more than 50 hp.
+    public void updateBuilding() {
+        if (tile.isOccupied() != null){
+            if(tile.isOccupied().getTeam() != owner){
+                if(hp - 10 <= 0){
+                    owner = tile.isOccupied().getTeam() ;
+                    hp = 50 ;
+                }
+                else {
+                    hp -= 10;
+                }
+            }
+            else {
+                if(hp + 10 >= 50){
+                    hp = 50;
+                }
+                else {
+                    hp += 10;
+                }
+            }
+        }
+        else {
+            if(hp + 5 >= 50){
+                hp = 50;
+            }
+            else {
+                hp += 5;
+            }
+        }
+    }
+
+}
