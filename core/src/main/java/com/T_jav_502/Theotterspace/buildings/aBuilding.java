@@ -1,6 +1,6 @@
 package com.T_jav_502.Theotterspace.buildings;
-import com.T_jav_502.Theotterspace.Teams;
-import com.T_jav_502.Theotterspace.Tiles;
+import com.T_jav_502.Theotterspace.teams.*;
+import com.T_jav_502.Theotterspace.tiles.*;
 public abstract class aBuilding {
     protected aTile tile ;
     protected Team owner ;
@@ -32,10 +32,10 @@ public abstract class aBuilding {
     //Else the building loos 10hp and if the hp fall to 0 or less the building change owner and get 50hp.
     //the building don't have more than 50 hp.
     public void updateBuilding() {
-        if (tile.isOccupied() != null){
-            if(tile.isOccupied().getTeam() != owner){
+        if (tile.getUnit() != null){
+            if(tile.getUnit().getTeam() != owner){
                 if(hp - 10 <= 0){
-                    owner = tile.isOccupied().getTeam() ;
+                    owner = tile.getUnit().getTeam() ;
                     hp = maxHp ;
                 }
                 else {
