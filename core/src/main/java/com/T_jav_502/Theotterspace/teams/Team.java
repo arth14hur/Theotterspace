@@ -29,4 +29,8 @@ public class Team {
     public List<aUnit> getUnits() {
         return unitList;
     }
+
+    public void addUnit(aUnit unit) {
+        unitList.add(unit);
+    }
 }
