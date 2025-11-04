@@ -7,7 +7,9 @@ import com.badlogic.gdx.graphics.GL20; // NOUVEL IMPORT pour Gdx.gl.glClear
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite; // NOUVEL IMPORT
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-
+//import com.T_jav_502.Theotterspace.tiles.*;
+//import com.T_jav_502.Theotterspace.buildings.*;
+//import com.T_jav_502.Theotterspace.units.*;
 /**
  * @jllink com.badlogic.gdx.ApplicationListener implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
