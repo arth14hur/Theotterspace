@@ -1,5 +1,5 @@
 package com.T_jav_502.Theotterspace.units;
-
+import com.T_jav_502.Theotterspace.teams.*;
 import static java.lang.Math.abs;
 
 public abstract class aUnit {
@@ -10,14 +10,15 @@ public abstract class aUnit {
     protected int attack;
     protected int range = 1;
     protected boolean moved = false;
-
+    protected Team.Species team;
 
     //Constructor
-    protected aUnit(int hp, int movement, int defense, int attack) {
+    protected aUnit(int hp, int movement, int defense, int attack, Team.Species team) {
         this.hp = hp;
         this.movement = movement;
         this.defense = defense;
         this.attack = attack;
+        this.team = team;
     }
 
     //Getters
@@ -59,10 +60,16 @@ public abstract class aUnit {
         }
     }
 
+    public Team.Species getTeam() {
+        return team;
+    }
+
     protected boolean isAtRange(aUnit opponent){
         //TODO: Fix once tiles are implemented.
         return true;
     }
+
+
 
 
 

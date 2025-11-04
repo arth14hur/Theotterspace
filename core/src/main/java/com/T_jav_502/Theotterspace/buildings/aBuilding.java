@@ -3,11 +3,11 @@ import com.T_jav_502.Theotterspace.teams.*;
 import com.T_jav_502.Theotterspace.tiles.*;
 public abstract class aBuilding {
     protected aTile tile ;
-    protected Team owner ;
+    protected Team.Species owner ;
     protected int hp ;
     protected int maxHp ;
 
-    public aBuilding (aTile tile , Team team , int hp) {
+    public aBuilding (aTile tile , Team.Species team , int hp) {
         this.tile = tile;
         this.owner = team;
         this.hp = hp;
@@ -18,7 +18,7 @@ public abstract class aBuilding {
         return tile;
     }
     //return the curent Team
-    public Team getTeam() {
+    public Team.Species getTeam() {
         return owner;
     }
     //return the curent hp
