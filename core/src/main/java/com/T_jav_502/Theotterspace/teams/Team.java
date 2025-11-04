@@ -7,6 +7,10 @@ import java.util.List;
 import static com.T_jav_502.Theotterspace.teams.Team.Species.OTTER;
 
 public class Team {
+    public Team(Species curentSpecies) {
+        this.curentSpecies = curentSpecies;
+    }
+
     public enum Species {
         OTTER,
         WOLF
@@ -15,17 +19,8 @@ public class Team {
 
     private List<aUnit> unitList = new ArrayList<aUnit>() ;
 
-    public Team(Species species ) {
-        switch(species) {
-            case WOLF :
-                curentSpecies = Species.WOLF ;
-                break;
-            case OTTER :
-                curentSpecies = OTTER ;
-                break;
-        }
 
-    }
+
 
     public Species getCurentSpecies() {
         return curentSpecies;
