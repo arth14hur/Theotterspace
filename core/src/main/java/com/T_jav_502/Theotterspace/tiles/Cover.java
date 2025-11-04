@@ -2,10 +2,8 @@ package com.T_jav_502.Theotterspace.tiles;
 
     public class Cover extends aTile {
 
-        public Cover(int posX, int posY) {
-            super(posX, posY, 0, 0, 0);
-            this.posX = posX;
-            this.posY = posY;
+        public Cover() {
+            super( 1.1F, 1.2F, 1.1F);
             this.vision = false;
         }
     }
