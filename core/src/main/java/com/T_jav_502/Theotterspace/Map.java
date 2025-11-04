@@ -1,5 +1,5 @@
 package com.T_jav_502.Theotterspace;
-import com.T_jav_502.Theotterspace.tiles.*
+import com.T_jav_502.Theotterspace.tiles.*;
 
 public class Map {
 
@@ -43,5 +43,13 @@ public class Map {
     public aTile[][] getMap() {
         return map;
     }
+    public aTile getTile(int x, int y) {
+        return map[x][y];
+    }
+
+    //Methods
+
+    //TODO: method to evaluate distance between two tiles, (returns the distance or a negative number if not accessible)
+
 
 }
