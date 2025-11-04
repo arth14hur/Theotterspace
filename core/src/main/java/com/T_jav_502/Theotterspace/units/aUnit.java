@@ -1,4 +1,4 @@
-package units;
+package com.T_jav_502.Theotterspace.units;
 
 import static java.lang.Math.abs;
 
@@ -9,18 +9,15 @@ public abstract class aUnit {
     protected int defense;
     protected int attack;
     protected int range = 1;
-    protected int posX;
-    protected int posY;
     protected boolean moved = false;
 
+
     //Constructor
-    protected aUnit(int hp, int movement, int defense, int attack, int posX, int posY) {
+    protected aUnit(int hp, int movement, int defense, int attack) {
         this.hp = hp;
         this.movement = movement;
         this.defense = defense;
         this.attack = attack;
-        this.posX = posX;
-        this.posY = posY;
     }
 
     //Getters
@@ -39,21 +36,11 @@ public abstract class aUnit {
     public int getRange() {
         return range;
     }
-    public int getPosX() {
-        return posX;
-    }
-    public int getPosY() {
-        return posY;
-    }
     public boolean isMoved() {
         return moved;
     }
 
     // Methods
-    public void setPos(int posX, int posY) {
-        this.posX = posX;
-        this.posY = posY;
-    }
 
     public boolean attack(aUnit opponent){
         //TODO: Make this method display a Fight scene.
@@ -73,8 +60,8 @@ public abstract class aUnit {
     }
 
     protected boolean isAtRange(aUnit opponent){
-        //TODO: Fix range to check if wall is in the way.
-        return abs(posX - opponent.getPosX()) + (abs(posY - opponent.getPosY())) <= range;
+        //TODO: Fix once tiles are implemented.
+        return true;
     }
 
 
