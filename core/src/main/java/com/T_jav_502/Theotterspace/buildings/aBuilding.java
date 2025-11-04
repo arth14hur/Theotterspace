@@ -5,11 +5,13 @@ public abstract class aBuilding {
     protected aTile tile ;
     protected Team owner ;
     protected int hp ;
+    protected int maxHp ;
 
     public aBuilding (aTile tile , Team team , int hp) {
         this.tile = tile;
         this.owner = team;
         this.hp = hp;
+        this.maxHp = hp;
     }
     //return the curent tile
     public aTile getTile() {
@@ -34,15 +36,15 @@ public abstract class aBuilding {
             if(tile.isOccupied().getTeam() != owner){
                 if(hp - 10 <= 0){
                     owner = tile.isOccupied().getTeam() ;
-                    hp = 50 ;
+                    hp = maxHp ;
                 }
                 else {
                     hp -= 10;
                 }
             }
             else {
-                if(hp + 10 >= 50){
-                    hp = 50;
+                if(hp + 10 >= maxHp){
+                    hp = maxHp;
                 }
                 else {
                     hp += 10;
@@ -50,8 +52,8 @@ public abstract class aBuilding {
             }
         }
         else {
-            if(hp + 5 >= 50){
-                hp = 50;
+            if(hp + 5 >= maxHp){
+                hp = maxHp;
             }
             else {
                 hp += 5;
