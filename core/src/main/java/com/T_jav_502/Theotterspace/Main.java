@@ -59,9 +59,10 @@ public class Main extends ApplicationAdapter {
 
         loutreSprite.setPosition(x, y);
 
-        Gdx.gl.glClearColor(0.1f, 0.2f, 0.1f, 1f);
+        Gdx.gl.glClearColor(0f, 0f, 0f, 0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        batch.enableBlending();
         batch.begin();
         loutreSprite.draw(batch);
         batch.end();

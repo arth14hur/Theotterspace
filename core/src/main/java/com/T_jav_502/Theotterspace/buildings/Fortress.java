@@ -1,5 +1,6 @@
 package com.T_jav_502.Theotterspace.buildings;
 import com.T_jav_502.Theotterspace.tiles.aTile;
+import com.T_jav_502.Theotterspace.teams.*;
 
 public class Fortress extends aBuilding{
     public Fortress(aTile tile , Team owner ) {
