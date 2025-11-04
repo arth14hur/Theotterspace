@@ -1,4 +1,6 @@
-package com.T_jav_502.Theotterspace.tile;
+package com.T_jav_502.Theotterspace.tiles;
+
+import com.T_jav_502.Theotterspace.units;
 
 abstract public class aTile {
 
@@ -8,7 +10,7 @@ abstract public class aTile {
     protected float modDef;
     protected float modPre;
     protected boolean vision = true;
-    protected boolean occupied = false;
+    protected aUnit Unit;
 
     public aTile (int posX, int posY, float modDef, float modMvt, float modPre) {
         this.posX = posX;
@@ -42,7 +44,7 @@ abstract public class aTile {
         return vision;
     }
 
-    public boolean isOccupied() {
-        return occupied;
+    public aUnit getUnit() {
+        return Unit;
     }
 }
