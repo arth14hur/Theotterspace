@@ -1,5 +1,4 @@
 package com.T_jav_502.Theotterspace.lwjgl3;
-
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.T_jav_502.Theotterspace.Main;
