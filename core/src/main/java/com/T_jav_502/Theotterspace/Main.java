@@ -3,21 +3,18 @@ package com.T_jav_502.Theotterspace;
 import com.badlogic.gdx.Game;
 import com.T_jav_502.Theotterspace.screens.GameScreen;
 
+import java.nio.file.Path;
+
 public class Main extends Game {
 
     @Override
     public void create() {
 
-        // Exemple de map (tu remplaceras ça par ta vraie map)
-        String[][] tiles = {
-            {"F", "F", "W", "F"},
-            {"D", "g", "W"},
-            {"F", "F", "F"}
-        };
+        // Charge un fichier de map (à placer dans assets/maps/)
+        Path mapPath = Path.of("assets/map01.txt");
 
-        Map map = new Map(Map.Theme.SPACESHIP, tiles);
+        Map map = new Map(Map.Theme.SPACESHIP, mapPath);
 
-        // Lance le GameScreen
         setScreen(new GameScreen(map));
     }
 }
