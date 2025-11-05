@@ -7,6 +7,11 @@ import static com.T_jav_502.Theotterspace.teams.Team.Species.OTTER;
 import static org.junit.jupiter.api.Assertions.*;
 
 class BlasterTest {
+    /**
+     * This class serves as unit tests for the entire aUnit class
+     *
+     *
+     */
     private Blaster blaster;
     private Blaster blaster2;
 
