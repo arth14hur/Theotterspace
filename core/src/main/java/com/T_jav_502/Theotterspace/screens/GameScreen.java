@@ -17,7 +17,7 @@ public class GameScreen implements Screen {
     private FitViewport viewport;
     private SpriteBatch batch;
 
-    // Taille d’une tuile (dans ton repère logique)
+    // Taille d’une tuile (dans le repère logique)
     private final float TILE_SIZE = 64f;
 
     public GameScreen(Map map) {
