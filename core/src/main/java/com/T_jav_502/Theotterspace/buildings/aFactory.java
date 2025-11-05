@@ -2,7 +2,9 @@ package com.T_jav_502.Theotterspace.buildings;
 
 import com.T_jav_502.Theotterspace.tiles.aTile;
 import com.T_jav_502.Theotterspace.teams.*;
-
+/**
+ * This abstract class defines the parameters and methods of all Factory.
+ */
 public abstract class aFactory extends aBuilding{
     public aFactory(aTile tile , Team.Species owner ) {
         super(tile , owner , 50);
