@@ -1,9 +1,16 @@
 package com.T_jav_502.Theotterspace;
+import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.tiles.*;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonString;
+import com.badlogic.gdx.utils.JsonValue;
+import com.jayway.jsonpath.JsonPath;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+
 
 public class Map {
 
@@ -30,34 +37,65 @@ public class Map {
     }
     private final aTile[][] map;
     private final Theme theme;
+    private Team[] teams;
+
+
 
 
     //Constructor
-    public Map(Theme theme, Path mapPath){
+    public Map(String mapPath){
 
-        this.theme = theme;
-        String[][] tiles = getTilesFromFile(mapPath);
-        map = new aTile[tiles.length][tiles[0].length];
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++) {
-                switch (tiles[i][j]){
-                    case "W":
-                        map[i][j] = new Wall();
-                        break;
-                    case "F":
-                        map[i][j] = new Floor();
-                        break;
-                    case "D":
-                        map[i][j] = new DamagedFloor();
-                        break;
-                    case "C":
-                        map[i][j] = new Cover();
-                        break;
-                    default:
-                        map[i][j] = null;
-                }
-            }
+        //get the json file
+        JsonReader json = new JsonReader();
+        JsonValue base = json.parse(Gdx.files.internal(mapPath));
+        JsonValue jsonMap = base.get("map");
+
+
+
+        int sizeX = base.getInt("sizeX");
+        int sizeY = base.getInt("sizeY");
+        map = new aTile[sizeX][sizeY];
+        int x = 0;
+        int y = 0;
+        for (JsonValue row : jsonMap.iterator()) {
+           for ( String tile :row.asStringArray()){
+               switch (tile){
+                   case "W":
+                       map[x][y] = new Wall();
+                       break;
+                   case "F":
+                       map[x][y] = new Floor();
+                       break;
+                   case "D":
+                       map[x][y] = new DamagedFloor();
+                       break;
+                   case "C":
+                       map[x][y] = new Cover();
+                       break;
+                   default:
+                       map[x][y] = null;
+               }
+               y++;
+           }
+           y=0;
+           x++;
         }
+
+        // directly set the theme
+        this.theme = Theme.valueOf(base.getString("theme"));
+
+        //create the different teams
+
+        //generate map
+
+        //create units in their team
+
+
+
+
+
+
+
     }
 
     //Getters

@@ -2,7 +2,7 @@ package com.T_jav_502.Theotterspace.units;
 import com.T_jav_502.Theotterspace.teams.*;
 import static java.lang.Math.abs;
 /**
- * This abstract class defines the parameters and methods of all Unit.
+ * This abstract class defines the parameters and methods of all Units.
  */
 public abstract class aUnit {
     //attributes
@@ -12,17 +12,20 @@ public abstract class aUnit {
     protected int attack;
     protected int range = 1;
     protected boolean moved = false;
-    protected Team.Species team;
+    protected int[] coordinates;
+    protected Team.Species team; //à mon avis pas utile
 
     //Constructor
-    protected aUnit(int hp, int movement, int defense, int attack, Team.Species team) {
+    protected aUnit(int hp, int movement, int defense, int attack, Team.Species team, int posX, int posY) {
         this.hp = hp;
         this.movement = movement;
         this.defense = defense;
         this.attack = attack;
         this.team = team;
+        this.coordinates = new int[]{posX, posY};
     }
 
+    //Getters
     /**
      * @return hp
      */
@@ -59,6 +62,20 @@ public abstract class aUnit {
     public boolean isMoved() {
         return moved;
     }
+
+    /**
+     * @return coordinates
+     */
+    public int[] getCoordinates() {
+        return coordinates;
+    }
+
+    //setters
+
+    public void setCoordinates(int posX, int posY) {
+        this.coordinates = new int[]{posX, posY};
+    }
+
 
     // Methods
 

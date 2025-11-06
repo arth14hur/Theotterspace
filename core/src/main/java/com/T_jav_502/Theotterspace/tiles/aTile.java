@@ -12,6 +12,7 @@ abstract public class aTile {
     protected aUnit Unit;
     protected boolean walkable = true;
     protected Texture texture;
+    protected boolean occupied = false;
 
     public aTile ( float modDef, float modMvt, float modPre) {
         this.modDef = modDef;
@@ -34,6 +35,14 @@ abstract public class aTile {
 
     public boolean isVision() {
         return vision;
+    }
+
+    public boolean isOccupied() {
+        return occupied;
+    }
+
+    public void setOccupied(boolean occupied) {
+        this.occupied = occupied;
     }
 
     public aUnit getUnit() {

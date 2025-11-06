@@ -11,9 +11,8 @@ public class Main extends Game {
     public void create() {
 
         // Charge un fichier de map (à placer dans assets/maps/)
-        Path mapPath = Path.of("assets/Maps/mapTuto.txt");
 
-        Map map = new Map(Map.Theme.SPACESHIP, mapPath);
+        Map map = new Map("../assets/Maps/mapTuto.json");
 
         setScreen(new GameScreen(map));
     }
