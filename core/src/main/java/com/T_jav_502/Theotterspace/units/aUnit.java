@@ -13,10 +13,10 @@ public abstract class aUnit {
     protected int range = 1;
     protected boolean moved = false;
     protected int[] coordinates;
-    protected Team.Species team; //à mon avis pas utile
+    protected Team team;
 
     //Constructor
-    protected aUnit(int hp, int movement, int defense, int attack, Team.Species team, int posX, int posY) {
+    protected aUnit(int hp, int movement, int defense, int attack, Team team, int posX, int posY) {
         this.hp = hp;
         this.movement = movement;
         this.defense = defense;
@@ -108,7 +108,7 @@ public abstract class aUnit {
     /**
      * @return team
      */
-    public Team.Species getTeam() {
+    public Team getTeam() {
         return team;
     }
 

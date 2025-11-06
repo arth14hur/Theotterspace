@@ -1,11 +1,12 @@
 package com.T_jav_502.Theotterspace;
 import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.tiles.*;
+import com.T_jav_502.Theotterspace.units.Blaster;
+import com.T_jav_502.Theotterspace.units.Heavy;
+import com.T_jav_502.Theotterspace.units.Infantry;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.JsonString;
 import com.badlogic.gdx.utils.JsonValue;
-import com.jayway.jsonpath.JsonPath;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,45 +49,72 @@ public class Map {
         //get the json file
         JsonReader json = new JsonReader();
         JsonValue base = json.parse(Gdx.files.internal(mapPath));
+
+        // set the tiles in the map
         JsonValue jsonMap = base.get("map");
-
-
-
         int sizeX = base.getInt("sizeX");
         int sizeY = base.getInt("sizeY");
-        map = new aTile[sizeX][sizeY];
-        int x = 0;
+        map = new aTile[sizeY][sizeX];
         int y = 0;
+        int x = 0;
         for (JsonValue row : jsonMap.iterator()) {
            for ( String tile :row.asStringArray()){
                switch (tile){
                    case "W":
-                       map[x][y] = new Wall();
+                       map[y][x] = new Wall();
                        break;
                    case "F":
-                       map[x][y] = new Floor();
+                       map[y][x] = new Floor();
                        break;
                    case "D":
-                       map[x][y] = new DamagedFloor();
+                       map[y][x] = new DamagedFloor();
                        break;
                    case "C":
-                       map[x][y] = new Cover();
+                       map[y][x] = new Cover();
                        break;
                    default:
-                       map[x][y] = null;
+                       map[y][x] = null;
                }
-               y++;
+               x++;
            }
-           y=0;
-           x++;
+           x=0;
+           y++;
         }
 
         // directly set the theme
         this.theme = Theme.valueOf(base.getString("theme"));
 
         //create the different teams
+        teams = new Team[2];
+        int i = 0;
+         for (JsonValue team :base.get("teams").iterator()){
+             teams[i] = new Team(Team.Species.valueOf(team.getString("species")));
+             for (JsonValue unit: team.get("units").iterator()){
+                 switch (unit.getString("type")){
+                     case "Blaster":
+                         teams[i].addUnit(new Blaster(
+                             teams[i],
+                             unit.getInt("posX"),
+                             unit.getInt("posY")
+                             ));
+                         break;
+                     case "Heavy":
+                         teams[i].addUnit(new Heavy(
+                             teams[i],
+                             unit.getInt("posX"),
+                             unit.getInt("posY")
+                         ));
+                     case "Infantry":
+                         teams[i].addUnit(new Infantry(
+                             teams[i],
+                             unit.getInt("posX"),
+                             unit.getInt("posY")
+                         ));
+                 }
+             }
+         }
 
-        //generate map
+
 
         //create units in their team
 
