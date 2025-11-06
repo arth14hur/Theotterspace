@@ -14,7 +14,7 @@ public class Main extends Game {
         Path mapPath = Path.of("assets/Maps/mapTuto.txt");
 
         Map map = new Map(Map.Theme.SPACESHIP, mapPath);
-
-        setScreen(new GameScreen(map));
+        PlaceUnit placeUnit = new PlaceUnit();
+        setScreen(new GameScreen(map, placeUnit));
     }
 }
