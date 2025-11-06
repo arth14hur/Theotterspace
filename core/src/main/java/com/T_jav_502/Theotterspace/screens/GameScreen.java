@@ -76,10 +76,11 @@ public class GameScreen implements Screen {
         for (Team team : teamList) {
             List<aUnit> unitList = team.getUnits();
             for (aUnit unit : unitList) {
+                int[] coordinates = unit.getCoordinates();
                 batch.draw(
                     unit.getTexture(),
-                    unit.getPosX() * TILE_SIZE,
-                    unit.getPosY() * TILE_SIZE
+                    coordinates[0] * TILE_SIZE,
+                    coordinates[1] * TILE_SIZE
                 );
             }
         }

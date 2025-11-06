@@ -15,8 +15,6 @@ public abstract class aUnit {
     protected int range = 1;
     protected boolean moved = false;
     protected int[] coordinates;
-    protected int posX;
-    protected int posY;
     protected Team.Species team; //à mon avis pas utile
     protected Texture texture;
     //Constructor
@@ -27,8 +25,6 @@ public abstract class aUnit {
         this.attack = attack;
         this.team = team;
         this.coordinates = new int[]{posX, posY};
-        this.posX = posX;
-        this.posY = posY;
         if(team == Team.Species.OTTER) {
             texture = new Texture("miniMapL.png");
         }
@@ -134,13 +130,6 @@ public abstract class aUnit {
     protected boolean isAtRange(aUnit opponent){
         //TODO: Fix once tiles are implemented.
         return true;
-    }
-
-    public int getPosX() {
-        return posX;
-    }
-    public int getPosY() {
-        return posY;
     }
     public Texture getTexture() {
         return texture;
