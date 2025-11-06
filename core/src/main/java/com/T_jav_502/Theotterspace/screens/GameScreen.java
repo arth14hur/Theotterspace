@@ -1,7 +1,10 @@
 package com.T_jav_502.Theotterspace.screens;
 
 import com.T_jav_502.Theotterspace.Map;
+import com.T_jav_502.Theotterspace.PlaceUnit;
+import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.tiles.aTile;
+import com.T_jav_502.Theotterspace.units.aUnit;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -9,19 +12,22 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameScreen implements Screen {
 
     private final Map map;
-
+    private PlaceUnit teams;
     private OrthographicCamera camera;
     private FitViewport viewport;
     private SpriteBatch batch;
 
     private final float TILE_SIZE = 64f;
 
-    public GameScreen(Map map) {
+    public GameScreen(Map map, PlaceUnit placeUnit) {
         this.map = map;
-
+        this.teams = placeUnit;
         camera = new OrthographicCamera();
         viewport = new FitViewport(1280, 720, camera);
         viewport.apply();
@@ -66,8 +72,21 @@ public class GameScreen implements Screen {
                 );
             }
         }
+        List<Team> teamList = teams.getTeams();
+        for (Team team : teamList) {
+            List<aUnit> unitList = team.getUnits();
+            for (aUnit unit : unitList) {
+                batch.draw(
+                    unit.getTexture(),
+                    unit.getPosX() * TILE_SIZE,
+                    unit.getPosY() * TILE_SIZE
+                );
+            }
+        }
 
         batch.end();
+        //batch.begin();
+        //aUnit[][] map = PlaceUnit.getMap();
     }
 
     @Override public void resize(int width, int height) { viewport.update(width, height); }

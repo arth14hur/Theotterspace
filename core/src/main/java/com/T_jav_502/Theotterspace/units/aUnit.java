@@ -1,8 +1,10 @@
 package com.T_jav_502.Theotterspace.units;
 import com.T_jav_502.Theotterspace.teams.*;
+import com.badlogic.gdx.graphics.Texture;
+
 import static java.lang.Math.abs;
 /**
- * This abstract class defines the parameters and methods of all Units.
+ * This abstract class defines the parameters and methods of all Unit.
  */
 public abstract class aUnit {
     //attributes
@@ -13,8 +15,10 @@ public abstract class aUnit {
     protected int range = 1;
     protected boolean moved = false;
     protected int[] coordinates;
+    protected int posX;
+    protected int posY;
     protected Team.Species team; //à mon avis pas utile
-
+    protected Texture texture;
     //Constructor
     protected aUnit(int hp, int movement, int defense, int attack, Team.Species team, int posX, int posY) {
         this.hp = hp;
@@ -23,9 +27,19 @@ public abstract class aUnit {
         this.attack = attack;
         this.team = team;
         this.coordinates = new int[]{posX, posY};
+        this.posX = posX;
+        this.posY = posY;
+        if(team == Team.Species.OTTER) {
+            texture = new Texture("miniMapL.png");
+        }
+        else if(team == Team.Species.WOLF) {
+            texture = new Texture("miniMapW.png");
+        }
+        else {
+            texture = new Texture("miniMapW.png");
+        }
     }
 
-    //Getters
     /**
      * @return hp
      */
@@ -122,7 +136,15 @@ public abstract class aUnit {
         return true;
     }
 
-
+    public int getPosX() {
+        return posX;
+    }
+    public int getPosY() {
+        return posY;
+    }
+    public Texture getTexture() {
+        return texture;
+    }
 
 
 

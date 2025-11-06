@@ -4,7 +4,7 @@ import com.T_jav_502.Theotterspace.teams.*;
  * This class defines the parameters of all Blaster unit.
  */
 public class Blaster extends aUnit{
-    public Blaster(Team.Species species, int posX, int posY) {
+    public Blaster(Team.Species species , int posX, int posY) {
         super(20, 5, 4, 10 , species, posX, posY);
         this.range = 2;
     }
