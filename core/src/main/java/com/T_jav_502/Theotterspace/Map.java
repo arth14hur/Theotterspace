@@ -1,9 +1,16 @@
 package com.T_jav_502.Theotterspace;
 import com.T_jav_502.Theotterspace.tiles.*;
+import com.T_jav_502.Theotterspace.teams.*;
+import com.T_jav_502.Theotterspace.units.Infantry;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.T_jav_502.Theotterspace.teams.Team.Species.OTTER;
+import static com.T_jav_502.Theotterspace.teams.Team.Species.WOLF;
 
 public class Map {
 

@@ -1,7 +1,9 @@
 package com.T_jav_502.Theotterspace.screens;
 
 import com.T_jav_502.Theotterspace.Map;
+import com.T_jav_502.Theotterspace.PlaceUnit;
 import com.T_jav_502.Theotterspace.tiles.aTile;
+import com.T_jav_502.Theotterspace.units.aUnit;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -68,6 +70,8 @@ public class GameScreen implements Screen {
         }
 
         batch.end();
+        batch.begin();
+        aUnit[][] map = PlaceUnit.getMap();
     }
 
     @Override public void resize(int width, int height) { viewport.update(width, height); }
