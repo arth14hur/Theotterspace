@@ -70,8 +70,8 @@ public class GameScreen implements Screen {
         }
 
         batch.end();
-        batch.begin();
-        aUnit[][] map = PlaceUnit.getMap();
+        //batch.begin();
+        //aUnit[][] map = PlaceUnit.getMap();
     }
 
     @Override public void resize(int width, int height) { viewport.update(width, height); }

@@ -27,6 +27,15 @@ public abstract class aUnit {
         this.team = team;
         this.posX = posX;
         this.posY = posY;
+        if(team == Team.Species.OTTER) {
+            texture = new Texture("miniMapL.png");
+        }
+        else if(team == Team.Species.WOLF) {
+            texture = new Texture("miniMapW.png");
+        }
+        else {
+            texture = new Texture("miniMapW.png");
+        }
     }
 
     /**

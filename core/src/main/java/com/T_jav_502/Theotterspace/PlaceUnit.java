@@ -14,24 +14,15 @@ import static com.T_jav_502.Theotterspace.teams.Team.Species.*;
 public class PlaceUnit {
 
     private List<Team> teams = new ArrayList<>();
-    private aUnit[][] map;
 
     public PlaceUnit() {
         teams.add(new Team(OTTER));
         teams.get(0).addUnit(new Infantry(OTTER, 1 , 1));
         teams.add(new Team(WOLF));
         teams.get(1).addUnit(new Infantry(WOLF , 1 , 2));
-        for (Team team : teams) {
-            for(aUnit unit : team.getUnits()) {
-                map[unit.getPosX()][unit.getPosY()] = unit ;
-            }
-        }
     }
-    public aUnit[][] getPlace () {
-        return map ;
-    }
-    public aUnit getaUnit (int posX, int posY) {
-        return map[posX][posY];
+    public List<Team> getTeams() {
+        return teams ;
     }
 
     /**
