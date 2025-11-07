@@ -1,5 +1,6 @@
 package com.T_jav_502.Theotterspace.screens;
 
+import com.T_jav_502.Theotterspace.PlaceUnit;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -49,7 +50,8 @@ public class TitleScreen implements Screen {
         startButton.addListener(event -> {
             if (!startButton.isPressed()) return false;
             Map map = new Map("../assets/Maps/mapTuto.json");
-            game.setScreen(new GameScreen(map));
+            PlaceUnit placeUnit = new PlaceUnit();
+            game.setScreen(new GameScreen(map, placeUnit));
             return true;
         });
 
