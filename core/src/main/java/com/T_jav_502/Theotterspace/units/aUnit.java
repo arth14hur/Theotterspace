@@ -1,10 +1,12 @@
 package com.T_jav_502.Theotterspace.units;
 import com.T_jav_502.Theotterspace.teams.*;
+import com.badlogic.gdx.math.Vector2;
+
 import com.badlogic.gdx.graphics.Texture;
 
 import static java.lang.Math.abs;
 /**
- * This abstract class defines the parameters and methods of all Unit.
+ * This abstract class defines the parameters and methods of all Units.
  */
 public abstract class aUnit {
     //attributes
@@ -14,28 +16,31 @@ public abstract class aUnit {
     protected int attack;
     protected int range = 1;
     protected boolean moved = false;
-    protected int[] coordinates;
-    protected Team.Species team; //à mon avis pas utile
+    protected Vector2 coordinates;
+    protected Team team;
     protected Texture texture;
     //Constructor
-    protected aUnit(int hp, int movement, int defense, int attack, Team.Species team, int posX, int posY) {
+    protected aUnit(int hp, int movement, int defense, int attack, Team team, int posX, int posY) {
         this.hp = hp;
         this.movement = movement;
         this.defense = defense;
         this.attack = attack;
         this.team = team;
-        this.coordinates = new int[]{posX, posY};
-        if(team == Team.Species.OTTER) {
-            texture = new Texture("miniMapL.png");
-        }
-        else if(team == Team.Species.WOLF) {
-            texture = new Texture("miniMapW.png");
-        }
-        else {
-            texture = new Texture("miniMapW.png");
+        this.coordinates = new Vector2(posX, posY);
+        switch (team.getCurentSpecies()){
+            case OTTER:
+                texture = new Texture("miniMapL.png");
+                break;
+            case WOLF:
+                texture = new Texture("miniMapW.png");
+                break;
+            default:
+                texture = new Texture("miniMapW.png");
+                break;
         }
     }
 
+    //Getters
     /**
      * @return hp
      */
@@ -76,14 +81,14 @@ public abstract class aUnit {
     /**
      * @return coordinates
      */
-    public int[] getCoordinates() {
+    public Vector2 getCoordinates() {
         return coordinates;
     }
 
     //setters
 
     public void setCoordinates(int posX, int posY) {
-        this.coordinates = new int[]{posX, posY};
+        this.coordinates = new Vector2(posX, posY);
     }
 
 
@@ -118,7 +123,7 @@ public abstract class aUnit {
     /**
      * @return team
      */
-    public Team.Species getTeam() {
+    public Team getTeam() {
         return team;
     }
 

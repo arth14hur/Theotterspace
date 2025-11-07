@@ -1,17 +1,18 @@
 package com.T_jav_502.Theotterspace.buildings;
 import com.T_jav_502.Theotterspace.teams.*;
 import com.T_jav_502.Theotterspace.tiles.*;
+import com.T_jav_502.Theotterspace.units.aUnit;
 
 /**
  * This abstract class defines the parameters and methods of all buildings.
  */
 public abstract class aBuilding {
     protected aTile tile ;
-    protected Team.Species owner ;
+    protected Team owner ;
     protected int hp ;
     protected int maxHp ;
 
-    public aBuilding (aTile tile , Team.Species team , int hp) {
+    public aBuilding (aTile tile , Team team , int hp) {
         this.tile = tile;
         this.owner = team;
         this.hp = hp;
@@ -26,7 +27,7 @@ public abstract class aBuilding {
     /**
      * @return owner
      */
-    public Team.Species getTeam() {
+    public Team getTeam() {
         return owner;
     }
     /**
@@ -44,11 +45,11 @@ public abstract class aBuilding {
      *Else the building loos 10hp and if the hp fall to 0 or less the building change owner and get 50hp.
      *the building don't have more than 50 hp.
      */
-    public void updateBuilding() {
-        if (tile.getUnit() != null){
-            if(tile.getUnit().getTeam() != owner){
+    public void updateBuilding(aUnit unit) {
+        if (unit != null){
+            if(unit.getTeam() != owner){
                 if(hp - 10 <= 0){
-                    owner = tile.getUnit().getTeam() ;
+                    owner = unit.getTeam() ;
                     hp = maxHp ;
                 }
                 else {

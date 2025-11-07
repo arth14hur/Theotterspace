@@ -8,6 +8,7 @@ import com.T_jav_502.Theotterspace.units.aUnit;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -75,11 +76,11 @@ public class GameScreen implements Screen {
         for (Team team : teamList) {
             List<aUnit> unitList = team.getUnits();
             for (aUnit unit : unitList) {
-                int[] coordinates = unit.getCoordinates();
+                Vector2 coordinates = unit.getCoordinates();
                 batch.draw(
                     unit.getTexture(),
-                    coordinates[0] * TILE_SIZE,
-                    coordinates[1] * TILE_SIZE
+                    coordinates.x * TILE_SIZE,
+                    coordinates.y * TILE_SIZE
                 );
             }
         }

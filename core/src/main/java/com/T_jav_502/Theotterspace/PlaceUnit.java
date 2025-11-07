@@ -17,9 +17,9 @@ public class PlaceUnit {
 
     public PlaceUnit() {
         teams.add(new Team(OTTER));
-        teams.get(0).addUnit(new Infantry(OTTER, 4 , 2));
+        teams.get(0).addUnit(new Infantry(teams.get(0), 4 , 2));
         teams.add(new Team(WOLF));
-        teams.get(1).addUnit(new Infantry(WOLF , 9 , 3));
+        teams.get(1).addUnit(new Infantry(teams.get(1) , 9 , 3));
     }
     public List<Team> getTeams() {
         return teams ;

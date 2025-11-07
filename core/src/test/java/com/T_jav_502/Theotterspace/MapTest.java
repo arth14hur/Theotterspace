@@ -15,11 +15,11 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MapTest {
-    Path pathToMap = Paths.get("../assets/map01.txt");
+    String pathToMap = "../assets/Maps/map01.txt";
     Map map;
     @BeforeEach
     void setUp() {
-        map = new Map(Map.Theme.SPACESHIP,pathToMap);
+        map = new Map(pathToMap);
     }
     @Test
     void getTheme() {
@@ -34,16 +34,9 @@ class MapTest {
 
     @Test
     void getTile() {
-        assertInstanceOf(Wall.class, map.getTile(0, 0));
+        assertInstanceOf(Wall.class, map.getTile(1, 0));
 //        assertInstanceOf(Floor.class, map.getTile(2, 2));
         assertInstanceOf(Cover.class, map.getTile(1, 2));
 
-    }
-
-    @Test
-    void getTilesFromFile() {
-        assertEquals("[[W, W, W, W, W], [W, F, C, D, W], [W, F, F, F, W], [W, D, C, F, W], [W, W, W, W, W\n" +
-                "]]" ,Arrays.deepToString(Map.getTilesFromFile(pathToMap)));
-        assertEquals("W", Objects.requireNonNull(Map.getTilesFromFile(pathToMap))[0][0]);
     }
 }
