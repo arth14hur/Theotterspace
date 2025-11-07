@@ -56,11 +56,29 @@ public class GameScreen implements Screen {
         int rows = grid.length;
         int cols = grid[0].length;
 
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
+
+        float camX = camera.position.x;
+        float camY = camera.position.y;
+
+        float viewWidth  = camera.viewportWidth * camera.zoom;
+        float viewHeight = camera.viewportHeight * camera.zoom;
+
+        float minX = camX - viewWidth / 2;
+        float maxX = camX + viewWidth / 2;
+        float minY = camY - viewHeight / 2;
+        float maxY = camY + viewHeight / 2;
+
+        int minCol = Math.max((int)(minX / TILE_SIZE), 0);
+        int maxCol = Math.min((int)(maxX / TILE_SIZE) + 1, cols);
+
+        int minRow = Math.max(rows - 1 - (int)(maxY / TILE_SIZE), 0);
+        int maxRow = Math.min(rows - 1 - (int)(minY / TILE_SIZE) + 1, rows);
+
+        for (int i = minRow; i < maxRow; i++) {
+            for (int j = minCol; j < maxCol; j++) {
 
                 aTile tile = grid[i][j];
-                if (tile == null) continue; // évite les crashs
+                if (tile == null) continue;
 
                 batch.draw(
                     tile.getTexture(),
@@ -71,23 +89,17 @@ public class GameScreen implements Screen {
                 );
             }
         }
-        List<Team> teamList = teams.getTeams();
-        for (Team team : teamList) {
-            List<aUnit> unitList = team.getUnits();
-            for (aUnit unit : unitList) {
-                int[] coordinates = unit.getCoordinates();
-                batch.draw(
-                    unit.getTexture(),
-                    coordinates[0] * TILE_SIZE,
-                    coordinates[1] * TILE_SIZE
-                );
+
+        for (Team team : teams.getTeams()) {
+            for (aUnit unit : team.getUnits()) {
+                int[] c = unit.getCoordinates();
+                batch.draw(unit.getTexture(), c[0] * TILE_SIZE, c[1] * TILE_SIZE);
             }
         }
 
         batch.end();
-        //batch.begin();
-        //aUnit[][] map = PlaceUnit.getMap();
     }
+
 
     @Override public void resize(int width, int height) { viewport.update(width, height); }
     @Override public void show() {}
