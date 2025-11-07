@@ -121,7 +121,7 @@ public class Map {
              }
              i++;
          }
-         
+
     }
 
     //Getters
@@ -148,11 +148,9 @@ public class Map {
      * @return an array of positions to know where a unit can move
      * TODO: change all int[] into Vector2
      */
-    public Array<Vector2> whareCanWalk(aUnit unit) {
-        int mvt = unit.getMovement();
+    public Array<Vector2> whareCanWalk(Vector2 startPos, int mvt) {
         Array<Vector2> output = new Array<>();
-        output.add(unit.getCoordinates());
-        Vector2 bufferInt;
+        output.add(startPos);
         Array<Vector2> directions = new Array<>();
         directions.add(new Vector2(0,-1));
         directions.add(new Vector2(0,1));
