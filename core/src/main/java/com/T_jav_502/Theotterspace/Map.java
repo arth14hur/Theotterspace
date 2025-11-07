@@ -4,13 +4,18 @@ import com.T_jav_502.Theotterspace.tiles.*;
 import com.T_jav_502.Theotterspace.units.Blaster;
 import com.T_jav_502.Theotterspace.units.Heavy;
 import com.T_jav_502.Theotterspace.units.Infantry;
+import com.T_jav_502.Theotterspace.units.aUnit;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 
 public class Map {
@@ -111,19 +116,11 @@ public class Map {
                              unit.getInt("posY")
                          ));
                  }
+                 map[unit.getInt("posY")][unit.getInt("posX")].setOccupied(true);
              }
+             i++;
          }
-
-
-
-        //create units in their team
-
-
-
-
-
-
-
+         
     }
 
     //Getters
@@ -134,26 +131,56 @@ public class Map {
         return map;
     }
     public aTile getTile(int x, int y) {
-        return map[x][y];
+        return map[y][x];
     }
 
+    public Team[] getTeams() {
+        return teams;
+    }
+    public Team getTeam(int teamIndex) {
+        return teams[teamIndex];
+    }
     //Methods
-    public static String[][] getTilesFromFile(Path path) {
-        try {
-            String content = Files.readString(path);
-            String[] splited = content.split("\\s*\\|\\s*");
-            String[][] tiles = new String[splited.length][];
-            for  (int i = 0; i < splited.length; i++) {
-                tiles[i] = splited[i].split(",");
+
+    /**
+     * s
+     * @return an array of positions to know where a unit can move
+     * TODO: change all int[] into Vector2
+     */
+    public Array<Vector2> whareCanWalk(aUnit unit) {
+        int mvt = unit.getMovement();
+        Array<Vector2> output = new Array<>();
+        output.add(unit.getCoordinates());
+        Vector2 bufferInt;
+        Array<Vector2> directions = new Array<>();
+        directions.add(new Vector2(0,-1));
+        directions.add(new Vector2(0,1));
+        directions.add(new Vector2(-1, 0));
+        directions.add(new Vector2(1, 0));
+        Vector2 bufferPosition = new Vector2();
+        while (mvt > 0) {
+            for (Vector2 position : output) {
+               for (Vector2 direction : directions) {
+                   bufferPosition.x = direction.x + position.x;
+                   bufferPosition.y = direction.y + position.y;
+                   if (bufferPosition.x > 0 && bufferPosition.y > 0 && bufferPosition.y < map.length && bufferPosition.x < map[0].length && !output.contains(bufferPosition, false)) {
+
+                       if (map[(int) bufferPosition.y][ (int) bufferPosition.x].isWalkable() && map[(int) bufferPosition.y][ (int) bufferPosition.x] != null && !map[(int) bufferPosition.y][ (int) bufferPosition.x].isOccupied()) {
+                           output.add(new Vector2 (bufferPosition.x, bufferPosition.y));
+                       }
+
+                   }
+               }
             }
-            return tiles;
-        }catch (Exception e){
-            System.err.println("Error reading file: " + path);
+            mvt --;
         }
-        return null;
+        System.out.println(output);
+        return output;
     }
 
-    //TODO: method to evaluate distance between two tiles, (returns the distance or a negative number if not accessible)
+    public boolean canUnitMoveHere(Array<Vector2> positions, Vector2 position) {
+                return positions.contains(position, false);
+    }
 
 
 }

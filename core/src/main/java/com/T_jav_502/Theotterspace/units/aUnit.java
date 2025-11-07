@@ -1,5 +1,7 @@
 package com.T_jav_502.Theotterspace.units;
 import com.T_jav_502.Theotterspace.teams.*;
+import com.badlogic.gdx.math.Vector2;
+
 import static java.lang.Math.abs;
 /**
  * This abstract class defines the parameters and methods of all Units.
@@ -12,7 +14,7 @@ public abstract class aUnit {
     protected int attack;
     protected int range = 1;
     protected boolean moved = false;
-    protected int[] coordinates;
+    protected Vector2 coordinates;
     protected Team team;
 
     //Constructor
@@ -22,7 +24,7 @@ public abstract class aUnit {
         this.defense = defense;
         this.attack = attack;
         this.team = team;
-        this.coordinates = new int[]{posX, posY};
+        this.coordinates = new Vector2(posX, posY);
     }
 
     //Getters
@@ -66,14 +68,14 @@ public abstract class aUnit {
     /**
      * @return coordinates
      */
-    public int[] getCoordinates() {
+    public Vector2 getCoordinates() {
         return coordinates;
     }
 
     //setters
 
     public void setCoordinates(int posX, int posY) {
-        this.coordinates = new int[]{posX, posY};
+        this.coordinates = new Vector2(posX, posY);
     }
 
 
