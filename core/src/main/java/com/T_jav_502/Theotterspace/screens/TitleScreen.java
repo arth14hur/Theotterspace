@@ -1,18 +1,21 @@
 package com.T_jav_502.Theotterspace.screens;
 
-import com.T_jav_502.Theotterspace.PlaceUnit;
+import com.T_jav_502.Theotterspace.Main;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.T_jav_502.Theotterspace.Main;
-import com.T_jav_502.Theotterspace.Map;
 
 public class TitleScreen implements Screen {
 
@@ -28,7 +31,7 @@ public class TitleScreen implements Screen {
     @Override
     public void show() {
         batch = new SpriteBatch();
-        font = new BitmapFont(); // font par défaut
+        font = new BitmapFont();
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
@@ -36,30 +39,34 @@ public class TitleScreen implements Screen {
         table.setFillParent(true);
         stage.addActor(table);
 
-        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        LabelStyle labelStyle = new LabelStyle();
         labelStyle.font = font;
 
         Label title = new Label("THE OTTER SPACE", labelStyle);
 
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+        TextButtonStyle buttonStyle = new TextButtonStyle();
         buttonStyle.font = font;
 
         TextButton startButton = new TextButton("Commencer", buttonStyle);
-        TextButton quitButton  = new TextButton("Quitter", buttonStyle);
+        TextButton quitButton = new TextButton("Quitter", buttonStyle);
 
-        startButton.addListener(event -> {
-            if (!startButton.isPressed()) return false;
-            Map map = new Map("../assets/Maps/mapTuto.json");
-            PlaceUnit placeUnit = new PlaceUnit();
-            game.setScreen(new GameScreen());
-            return true;
+        // Bouton Quitter
+        quitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                Gdx.app.exit();
+            }
         });
 
-        quitButton.addListener(event -> {
-            if (!quitButton.isPressed()) return false;
-            Gdx.app.exit();
-            return true;
+
+        startButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                TiledMap tiledMap = new TmxMapLoader().load("Maps/test.tmx");
+                game.setScreen(new GameScreen(tiledMap));
+            }
         });
+
 
         table.add(title).padBottom(40);
         table.row();
@@ -76,16 +83,11 @@ public class TitleScreen implements Screen {
         stage.draw();
     }
 
-    @Override
-    public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
-    }
-
+    @Override public void resize(int width, int height) { stage.getViewport().update(width, height, true); }
     @Override public void pause() {}
     @Override public void resume() {}
     @Override public void hide() {}
-    @Override
-    public void dispose() {
+    @Override public void dispose() {
         stage.dispose();
         font.dispose();
         batch.dispose();

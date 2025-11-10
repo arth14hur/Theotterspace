@@ -1,6 +1,6 @@
 package com.T_jav_502.Theotterspace.lwjgl3;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl3.*;
 import com.T_jav_502.Theotterspace.Main;
 
 /** Launches the desktop (LWJGL3) application. */
@@ -38,7 +38,13 @@ public class Lwjgl3Launcher {
         //// You can choose to remove the following line and the mentioned dependency if you want; they
         //// are not intended for games that use GL30 (which is compatibility with OpenGL ES 3.0).
         configuration.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES20, 0, 0);
-
+        configuration.setWindowListener(new Lwjgl3WindowAdapter() {
+            @Override
+            public boolean closeRequested() {
+                Gdx.app.exit();
+                return true;
+            }
+        });
         return configuration;
     }
 }
