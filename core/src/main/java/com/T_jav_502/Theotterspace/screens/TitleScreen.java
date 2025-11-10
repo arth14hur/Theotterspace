@@ -51,7 +51,7 @@ public class TitleScreen implements Screen {
             if (!startButton.isPressed()) return false;
             Map map = new Map("../assets/Maps/mapTuto.json");
             PlaceUnit placeUnit = new PlaceUnit();
-            game.setScreen(new GameScreen(map, placeUnit));
+            game.setScreen(new GameScreen());
             return true;
         });
 
