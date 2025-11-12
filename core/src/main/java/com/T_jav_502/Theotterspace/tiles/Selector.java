@@ -19,6 +19,13 @@ public class Selector {
     }
 
     public void setCoordinate(Vector2 coordinate) {
-        this.coordinate = coordinate;
+        if (!(coordinate.x < 0 || coordinate.y < 0)) {
+            this.coordinate = coordinate;
+        }
+        else{
+            System.out.println("Invalid coordinate");
+        }
+
+
     }
 }

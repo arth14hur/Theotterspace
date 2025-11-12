@@ -10,6 +10,7 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -51,7 +52,8 @@ public class GameScreen implements Screen {
     private final CameraDrag cameraDrag;
     private final CameraZoom cameraZoom;
     private final BitmapFont font = new BitmapFont();
-    private final Selector selector =  new Selector();
+    private final Selector selector ;
+    private final Texture textureselector ;
 
     private final float MIN_ZOOM = 0.3f;
     private final float MAX_ZOOM = 3f;
@@ -68,6 +70,8 @@ public class GameScreen implements Screen {
         this.map = map;
         this.renderer = new OrthogonalTiledMapRenderer(tiledMap, scale);
 
+        this.selector = new Selector();
+        this.textureselector = new Texture(Gdx.files.internal("Select2.png"));
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(1280, 720, camera);
         viewport.apply();
@@ -138,25 +142,25 @@ public class GameScreen implements Screen {
             public boolean keyDown(int keycode) {
                 if (keycode == Input.Keys.DOWN) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(co.set(co.x, co.y-1));
+                    selector.setCoordinate(new Vector2(co.x, co.y-1));
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
                 else if (keycode == Input.Keys.UP) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(co.set(co.x, co.y+1));
+                    selector.setCoordinate(new Vector2(co.x, co.y+1));
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
                 else if (keycode == Input.Keys.LEFT) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(co.set(co.x-1, co.y));
+                    selector.setCoordinate(new Vector2(co.x-1, co.y));
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
                 else if (keycode == Input.Keys.RIGHT) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(co.set(co.x+1, co.y));
+                    selector.setCoordinate(new Vector2(co.x+1, co.y));
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
@@ -194,8 +198,9 @@ public class GameScreen implements Screen {
                 unit.draw(renderer.getBatch());
             }
         }
-
+        renderer.getBatch().draw(textureselector, selector.getCoordinate().x*32, selector.getCoordinate().y*32);
         renderer.getBatch().end();
+
     }
 
     @Override
