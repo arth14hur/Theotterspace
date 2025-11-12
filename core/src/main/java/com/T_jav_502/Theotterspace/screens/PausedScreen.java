@@ -17,38 +17,60 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 /**
  * Represents the pause overlay screen that appears when the player
- * pauses the game. Displays a dimmed background and allows resuming
- * the game or returning to the title screen.
+ * pauses the game.
+ * <p>
+ * This screen does not interrupt the rendering of the {@link GameScreen}
+ * — the game map and units remain visible in the background — but it
+ * overlays a semi-transparent dark layer and UI controls for resuming
+ * or leaving the game.
+ * </p>
  *
- * <p><strong>Features:</strong></p>
+ * <h3>Features</h3>
  * <ul>
- *   <li>Displays a semi-transparent background overlay.</li>
- *   <li>Provides "Continue" and "Return to Menu" buttons.</li>
- *   <li>Can resume gameplay or navigate to {@link TitleScreen}.</li>
+ *   <li>Renders a translucent overlay above the active {@link GameScreen}.</li>
+ *   <li>Displays "Continue" and "Return to Menu" buttons centered on screen.</li>
+ *   <li>Allows resuming gameplay or returning to the {@link TitleScreen}.</li>
+ *   <li>Keeps all previously rendered elements from {@link GameScreen} visible underneath.</li>
  * </ul>
+ *
+ * <h3>Usage</h3>
+ * <p>
+ * When the player pauses the game, the {@link Main} instance can replace the active
+ * {@link GameScreen} with a new {@code PausedScreen}:
+ * </p>
+ *
+ * <pre>{@code
+ * main.setScreen(new PausedScreen(main, currentGameScreen));
+ * }</pre>
+ *
+ * When "Continue" is clicked, the screen switches back to the given {@link GameScreen}.
+ * When "Return to Menu" is clicked, it transitions to the {@link TitleScreen}.
+ *
+ * @see GameScreen
+ * @see TitleScreen
  */
 public class PausedScreen implements Screen {
 
-    /** Reference to the main application */
+    /** Reference to the main application controlling screen transitions. */
     private final Main main;
 
-    /** Stage for displaying pause UI elements */
+    /** Stage used for managing and rendering pause menu UI components. */
     private final Stage stage;
 
-    /** Font used for labels and buttons */
+    /** Font used for rendering the title and button labels. */
     private final BitmapFont font = new BitmapFont();
 
-    /** ShapeRenderer for drawing the translucent overlay */
+    /** ShapeRenderer used to draw the translucent background overlay. */
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
-    /** The game screen to return to when resuming */
+    /** The {@link GameScreen} instance to return to when resuming gameplay. */
     private final GameScreen gameScreen;
 
     /**
-     * Constructs a pause screen overlay.
+     * Constructs a pause overlay screen.
      *
-     * @param main       Reference to the main application
-     * @param gameScreen The current {@link GameScreen} to resume later
+     * @param main       the main {@link Main} application instance
+     * @param gameScreen the current {@link GameScreen} instance to resume after unpausing
      */
     public PausedScreen(Main main, GameScreen gameScreen) {
         this.main = main;
@@ -60,7 +82,8 @@ public class PausedScreen implements Screen {
     }
 
     /**
-     * Creates the pause menu UI components and layout.
+     * Creates and configures the pause menu interface, including the title label
+     * and action buttons ("Continue" and "Return to Menu").
      */
     private void createUI() {
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
@@ -97,6 +120,16 @@ public class PausedScreen implements Screen {
         stage.addActor(table);
     }
 
+    /**
+     * Renders the pause overlay.
+     * <p>
+     * This method draws a semi-transparent black rectangle over the screen
+     * (allowing the {@link GameScreen} to remain visible behind),
+     * then renders the pause menu UI.
+     * </p>
+     *
+     * @param delta time in seconds since the last frame
+     */
     @Override
     public void render(float delta) {
         // Draw semi-transparent overlay
@@ -112,13 +145,26 @@ public class PausedScreen implements Screen {
         stage.draw();
     }
 
-    @Override public void resize(int width, int height) { stage.getViewport().update(width, height, true); }
+    /**
+     * Adjusts the viewport to handle window resizing.
+     *
+     * @param width  new window width
+     * @param height new window height
+     */
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
+
     @Override public void show() {}
     @Override public void pause() {}
     @Override public void resume() {}
     @Override public void hide() {}
 
-    /** Disposes all resources used by this screen. */
+    /**
+     * Releases all LibGDX resources used by this screen, including fonts,
+     * the stage, and the overlay renderer.
+     */
     @Override
     public void dispose() {
         stage.dispose();

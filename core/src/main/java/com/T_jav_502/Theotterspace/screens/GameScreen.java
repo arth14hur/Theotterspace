@@ -8,86 +8,88 @@ import com.T_jav_502.Theotterspace.inputs.CameraDrag;
 import com.T_jav_502.Theotterspace.inputs.CameraZoom;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 /**
- * Represents the main in-game screen where the map, units, and gameplay
- * interactions are displayed and handled. It supports camera movement,
- * zooming, and a pause menu overlay with options to resume or return
- * to the title screen.
+ * Represents the main in-game screen responsible for rendering the map,
+ * units, and handling gameplay logic such as camera controls and pausing.
  *
  * <p><strong>Features:</strong></p>
  * <ul>
- *   <li>Renders the tile map and game units.</li>
- *   <li>Camera drag and zoom using mouse inputs.</li>
- *   <li>Pause system with semi-transparent overlay and interactive buttons.</li>
- *   <li>ESC key toggles the pause state.</li>
+ *   <li>Renders the Tiled map and all {@link aUnit} instances for each {@link Team}.</li>
+ *   <li>Supports camera dragging and zooming via mouse input.</li>
+ *   <li>Includes a pause system that overlays a dimmed UI while preserving unit rendering.</li>
+ *   <li>Allows resuming or returning to the {@link TitleScreen} using the pause menu.</li>
+ *   <li>ESC key toggles pause state.</li>
  * </ul>
+ *
+ * <p>When paused, the game world remains visible — including all units —
+ * but player input affecting gameplay is suspended until resumed.</p>
  */
 public class GameScreen implements Screen {
 
-    /** Reference to the main application instance */
+    /** Reference to the main application */
     private final Main main;
 
-    /** Camera used to view the game world */
+    /** Camera used to render the world */
     private final OrthographicCamera camera;
 
-    /** Handles screen resizing and projection for the camera */
+    /** Viewport maintaining aspect ratio */
     private final FitViewport viewport;
 
-    /** Renders the tiled map */
-    final OrthogonalTiledMapRenderer renderer;
+    /** Tiled map renderer */
+    private final OrthogonalTiledMapRenderer renderer;
 
-    /** UI stage for rendering overlays and buttons */
+    /** Stage for UI (pause menu, etc.) */
     private final Stage stage;
 
-    /** Reference to the current map logic */
+    /** Map data containing teams and units */
     private final Map map;
 
-    /** Manages camera dragging behavior */
+    /** Handles mouse dragging for camera movement */
     private final CameraDrag cameraDrag;
 
-    /** Manages camera zoom behavior */
+    /** Handles mouse scroll zoom */
     private final CameraZoom cameraZoom;
 
     /** Font used for UI elements */
     private final BitmapFont font = new BitmapFont();
 
-    /** Renderer used for drawing the semi-transparent pause overlay */
+    /** Renderer for semi-transparent overlay when paused */
     private final ShapeRenderer shapeRenderer;
 
-    /** Minimum, maximum, and step values for zoom */
-    private final float MIN_ZOOM = 0.3f, MAX_ZOOM = 3f, ZOOM_STEP = 0.1f;
+    /** Zoom constraints */
+    private final float MIN_ZOOM = 0.3f, MAX_ZOOM = 3f;
 
-    /** Indicates whether the game is currently paused */
+    /** Whether the game is currently paused */
     private boolean isPaused = false;
 
-    /** UI elements for pause display */
+    /** Pause menu UI elements */
     private Label pauseLabel;
     private TextButton continueButton, quitButton;
 
     /**
-     * Constructs the main game screen.
+     * Constructs the main gameplay screen.
      *
-     * @param main  Reference to the main application
-     * @param tiledMap The Tiled map to render
-     * @param map The logical map object containing teams and units
-     * @param scale Scaling factor applied to the tile map renderer
+     * @param main Reference to the main application
+     * @param tiledMap Map file loaded via {@link com.badlogic.gdx.maps.tiled.TmxMapLoader}
+     * @param map Logical map containing teams and units
+     * @param scale Scale factor for map rendering
      */
     public GameScreen(Main main, TiledMap tiledMap, Map map, int scale) {
         this.main = main;
@@ -96,32 +98,28 @@ public class GameScreen implements Screen {
 
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(1280, 720, camera);
-        viewport.apply();
-        camera.position.set(1280 / 2f, 720 / 2f, 0);
-
         this.stage = new Stage(new FitViewport(1280, 720));
 
         this.cameraDrag = new CameraDrag(camera);
         this.cameraZoom = new CameraZoom(camera, MIN_ZOOM, MAX_ZOOM);
         this.shapeRenderer = new ShapeRenderer();
 
+        camera.position.set(1280 / 2f, 720 / 2f, 0);
+
         createUI();
         setupInput();
     }
 
     /**
-     * Initializes the pause menu UI elements (label and buttons)
-     * and places them at the center of the screen.
+     * Creates the pause UI elements (title + buttons).
      */
     private void createUI() {
-        Label.LabelStyle style = new Label.LabelStyle(font, Color.WHITE);
+        Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
 
-        // Pause label
-        pauseLabel = new Label("PAUSE", style);
+        pauseLabel = new Label("PAUSED", labelStyle);
         pauseLabel.setFontScale(2f);
         pauseLabel.setVisible(false);
 
-        // Buttons
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.font = font;
 
@@ -131,7 +129,6 @@ public class GameScreen implements Screen {
         continueButton.setVisible(false);
         quitButton.setVisible(false);
 
-        // Button listeners
         continueButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -146,19 +143,18 @@ public class GameScreen implements Screen {
             }
         });
 
-        // Layout
-        Table pauseTable = new Table();
-        pauseTable.center();
-        pauseTable.setFillParent(true);
-        pauseTable.add(pauseLabel).padBottom(30).row();
-        pauseTable.add(continueButton).width(200).height(40).padBottom(10).row();
-        pauseTable.add(quitButton).width(200).height(40);
-        stage.addActor(pauseTable);
+        Table table = new Table();
+        table.setFillParent(true);
+        table.center();
+        table.add(pauseLabel).padBottom(30).row();
+        table.add(continueButton).width(200).height(40).padBottom(10).row();
+        table.add(quitButton).width(200).height(40);
+
+        stage.addActor(table);
     }
 
     /**
-     * Configures input handling for camera controls and pause toggling.
-     * Includes UI input processing and ESC key detection.
+     * Sets up combined input handling for UI, camera, and pause key.
      */
     private void setupInput() {
         InputMultiplexer multiplexer = new InputMultiplexer();
@@ -172,8 +168,7 @@ public class GameScreen implements Screen {
 
             @Override
             public boolean scrolled(float amountX, float amountY) {
-                if (!isPaused)
-                    cameraZoom.zoom(amountY * 0.1f, Gdx.input.getX(), Gdx.input.getY());
+                if (!isPaused) cameraZoom.zoom(amountY * 0.1f, Gdx.input.getX(), Gdx.input.getY());
                 return true;
             }
 
@@ -189,10 +184,9 @@ public class GameScreen implements Screen {
     }
 
     /**
-     * Toggles the paused state and updates the visibility
-     * of UI elements accordingly.
+     * Enables or disables the paused state.
      *
-     * @param pause true to enable pause, false to resume the game
+     * @param pause True to pause, false to resume
      */
     private void togglePause(boolean pause) {
         isPaused = pause;
@@ -202,9 +196,7 @@ public class GameScreen implements Screen {
     }
 
     /**
-     * Renders the game scene and UI each frame.
-     *
-     * @param delta Time elapsed since the last frame in seconds
+     * Renders the game world, units, and pause overlay if active.
      */
     @Override
     public void render(float delta) {
@@ -214,20 +206,20 @@ public class GameScreen implements Screen {
 
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
         renderer.setView(camera);
+
+        // Always render the map
         renderer.render();
 
-        // Draw units if not paused
-        if (!isPaused) {
-            renderer.getBatch().begin();
-            for (Team team : map.getTeams()) {
-                for (aUnit unit : team.getUnits()) {
-                    unit.draw(renderer.getBatch());
-                }
+        // Always render units (even when paused)
+        renderer.getBatch().begin();
+        for (Team team : map.getTeams()) {
+            for (aUnit unit : team.getUnits()) {
+                unit.draw(renderer.getBatch());
             }
-            renderer.getBatch().end();
         }
+        renderer.getBatch().end();
 
-        // Dimmed overlay when paused
+        // Semi-transparent overlay when paused
         if (isPaused) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -253,7 +245,7 @@ public class GameScreen implements Screen {
     @Override public void resume() {}
     @Override public void hide() {}
 
-    /** Disposes of all resources used by the screen. */
+    /** Frees all allocated resources. */
     @Override
     public void dispose() {
         renderer.getMap().dispose();
