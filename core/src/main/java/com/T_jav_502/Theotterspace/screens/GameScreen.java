@@ -2,25 +2,24 @@ package com.T_jav_502.Theotterspace.screens;
 
 import com.T_jav_502.Theotterspace.Map;
 import com.T_jav_502.Theotterspace.teams.Team;
+import com.T_jav_502.Theotterspace.tiles.Selector;
 import com.T_jav_502.Theotterspace.units.aUnit;
 import com.T_jav_502.Theotterspace.inputs.CameraDrag;
 import com.T_jav_502.Theotterspace.inputs.CameraZoom;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputMultiplexer;
 
 /**
  * Represents the main game screen, handling rendering of the map, units, and UI, as well as camera controls.
@@ -52,6 +51,7 @@ public class GameScreen implements Screen {
     private final CameraDrag cameraDrag;
     private final CameraZoom cameraZoom;
     private final BitmapFont font = new BitmapFont();
+    private final Selector selector =  new Selector();
 
     private final float MIN_ZOOM = 0.3f;
     private final float MAX_ZOOM = 3f;
@@ -133,6 +133,39 @@ public class GameScreen implements Screen {
                 cameraZoom.zoom(amountY * 0.1f, Gdx.input.getX(), Gdx.input.getY());
                 return true;
             }
+
+            @Override
+            public boolean keyDown(int keycode) {
+                if (keycode == Input.Keys.DOWN) {
+                    Vector2 co = selector.getCoordinate();
+                    selector.setCoordinate(co.set(co.x, co.y-1));
+                    System.out.println(selector.getCoordinate());
+                    return true;
+                }
+                else if (keycode == Input.Keys.UP) {
+                    Vector2 co = selector.getCoordinate();
+                    selector.setCoordinate(co.set(co.x, co.y+1));
+                    System.out.println(selector.getCoordinate());
+                    return true;
+                }
+                else if (keycode == Input.Keys.LEFT) {
+                    Vector2 co = selector.getCoordinate();
+                    selector.setCoordinate(co.set(co.x-1, co.y));
+                    System.out.println(selector.getCoordinate());
+                    return true;
+                }
+                else if (keycode == Input.Keys.RIGHT) {
+                    Vector2 co = selector.getCoordinate();
+                    selector.setCoordinate(co.set(co.x+1, co.y));
+                    System.out.println(selector.getCoordinate());
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+
+
         });
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -161,6 +194,7 @@ public class GameScreen implements Screen {
                 unit.draw(renderer.getBatch());
             }
         }
+
         renderer.getBatch().end();
     }
 
