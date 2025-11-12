@@ -23,15 +23,15 @@ public class GameScreen implements Screen {
     private Map map = new Map("../assets/Maps/mapTuto.json");
     private Stage stage;
 
-    public GameScreen(TiledMap tiledMap, Map map) {
-        renderer = new OrthogonalTiledMapRenderer(tiledMap, 4);
+    public GameScreen(TiledMap tiledMap, Map map, int scale) {
+        renderer = new OrthogonalTiledMapRenderer(tiledMap, scale);
         camera = new OrthographicCamera();
         viewport = new FitViewport(1280, 720, camera);
         viewport.apply();
         camera.position.set(1280 / 2f, 720 / 2f, 0);
         this.map = map;
 
-        stage = new TiledMapStage(tiledMap);
+        stage = new TiledMapStage(tiledMap, scale);
         Gdx.input.setInputProcessor(stage);
         stage.getViewport().setCamera(camera);
     }
