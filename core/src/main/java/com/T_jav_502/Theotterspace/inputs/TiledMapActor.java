@@ -1,4 +1,4 @@
-package com.T_jav_502.Theotterspace.screens;
+package com.T_jav_502.Theotterspace.inputs;
 
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -10,7 +10,7 @@ public class TiledMapActor extends Actor {
 
     private TiledMapTileLayer tiledLayer;
 
-    TiledMapTileLayer.Cell cell;
+    public TiledMapTileLayer.Cell cell;
 
     public TiledMapActor(TiledMap tiledMap, TiledMapTileLayer tiledLayer, TiledMapTileLayer.Cell cell) {
         this.tiledMap = tiledMap;

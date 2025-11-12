@@ -11,7 +11,10 @@ public class Lwjgl3Launcher {
     }
 
     private static Lwjgl3Application createApplication() {
-        return new Lwjgl3Application(new Main(), getDefaultConfiguration());
+        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        config.setTitle("Theotterspace");
+        config.setWindowedMode(1280, 720);
+        return new Lwjgl3Application(new Main(), config);
     }
 
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {

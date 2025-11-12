@@ -1,6 +1,7 @@
 package com.T_jav_502.Theotterspace.screens;
 
 import com.T_jav_502.Theotterspace.Map;
+import com.T_jav_502.Theotterspace.inputs.ClickPosition;
 import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.units.aUnit;
 import com.T_jav_502.Theotterspace.inputs.CameraDrag;
@@ -48,9 +49,10 @@ public class GameScreen implements Screen {
     private final OrthogonalTiledMapRenderer renderer;
     private final Stage stage;
 
-    private final Map map;
+    //private final Map map;
     private final CameraDrag cameraDrag;
     private final CameraZoom cameraZoom;
+    private final ClickPosition clickPosition;
     private final BitmapFont font = new BitmapFont();
 
     private final float MIN_ZOOM = 0.3f;
@@ -61,11 +63,11 @@ public class GameScreen implements Screen {
      * Constructs a new GameScreen.
      *
      * @param tiledMap the {@link TiledMap} to render
-     * @param map      the {@link Map} object containing teams and units
+     * //@param map      the {@link Map} object containing teams and units
      * @param scale    the scale factor for rendering the map
      */
-    public GameScreen(TiledMap tiledMap, Map map, int scale) {
-        this.map = map;
+    public GameScreen(TiledMap tiledMap, int scale) {
+        //this.map = map;
         this.renderer = new OrthogonalTiledMapRenderer(tiledMap, scale);
 
         this.camera = new OrthographicCamera();
@@ -77,6 +79,7 @@ public class GameScreen implements Screen {
 
         this.cameraDrag = new CameraDrag(camera);
         this.cameraZoom = new CameraZoom(camera, MIN_ZOOM, MAX_ZOOM);
+        this.clickPosition = new ClickPosition(camera);
 
         createUI();
         setupInput();
@@ -133,6 +136,12 @@ public class GameScreen implements Screen {
                 cameraZoom.zoom(amountY * 0.1f, Gdx.input.getX(), Gdx.input.getY());
                 return true;
             }
+
+            @Override
+            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                clickPosition.update();
+                return true;
+            }
         });
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -155,13 +164,13 @@ public class GameScreen implements Screen {
         stage.act(delta);
         stage.draw();
 
-        renderer.getBatch().begin();
-        for (Team team : map.getTeams()) {
-            for (aUnit unit : team.getUnits()) {
-                unit.draw(renderer.getBatch());
-            }
-        }
-        renderer.getBatch().end();
+//        renderer.getBatch().begin();
+//        for (Team team : map.getTeams()) {
+//            for (aUnit unit : team.getUnits()) {
+//                unit.draw(renderer.getBatch());
+//            }
+//        }
+//        renderer.getBatch().end();
     }
 
     @Override
