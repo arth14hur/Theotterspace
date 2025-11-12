@@ -5,6 +5,6 @@ import com.T_jav_502.Theotterspace.teams.*;
  */
 public class Heavy extends aUnit{
     public Heavy(Team team, int posX, int posY) {
-        super(50, 4, 8, 5, team, posX, posY);
+        super(50, 4, 8, 5, team, posX, posY,"miniMap");
     }
 }

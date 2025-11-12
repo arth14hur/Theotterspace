@@ -1,5 +1,6 @@
 package com.T_jav_502.Theotterspace.units;
 import com.T_jav_502.Theotterspace.teams.*;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 
 import com.badlogic.gdx.graphics.Texture;
@@ -8,7 +9,7 @@ import static java.lang.Math.abs;
 /**
  * This abstract class defines the parameters and methods of all Units.
  */
-public abstract class aUnit {
+public abstract class aUnit extends Sprite {
     //attributes
     protected int hp;
     protected int movement;
@@ -18,26 +19,18 @@ public abstract class aUnit {
     protected boolean moved = false;
     protected Vector2 coordinates;
     protected Team team;
-    protected Texture texture;
     //Constructor
-    protected aUnit(int hp, int movement, int defense, int attack, Team team, int posX, int posY) {
+    protected aUnit(int hp, int movement, int defense, int attack, Team team, int posX, int posY, String unitType) {
+        super(new Sprite(new Texture("../assets/"+unitType+ (team.getCurentSpecies() == Team.Species.OTTER ? "L" : "W") +".png")));
+
         this.hp = hp;
         this.movement = movement;
         this.defense = defense;
         this.attack = attack;
         this.team = team;
         this.coordinates = new Vector2(posX, posY);
-        switch (team.getCurentSpecies()){
-            case OTTER:
-                texture = new Texture("miniMapL.png");
-                break;
-            case WOLF:
-                texture = new Texture("miniMapW.png");
-                break;
-            default:
-                texture = new Texture("miniMapW.png");
-                break;
-        }
+        setX(posX);
+        setY(posY);
     }
 
     //Getters
@@ -94,6 +87,21 @@ public abstract class aUnit {
 
     // Methods
 
+    public void move(Vector2 coordinates) {
+        this.coordinates = coordinates;
+        setX(coordinates.x);
+        setY(coordinates.y);
+    }
+
+    @Override
+    public void setX(float x){
+        super.setX(x * 32);
+    }
+    @Override
+    public void setY(float y){
+        super.setY(y * 32);
+    }
+
     /**
      * attack an enemy unit
      * @param opponent
@@ -135,9 +143,6 @@ public abstract class aUnit {
     protected boolean isAtRange(aUnit opponent){
         //TODO: Fix once tiles are implemented.
         return true;
-    }
-    public Texture getTexture() {
-        return texture;
     }
 
 

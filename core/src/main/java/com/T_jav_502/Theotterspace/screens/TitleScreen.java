@@ -1,6 +1,7 @@
 package com.T_jav_502.Theotterspace.screens;
 
 import com.T_jav_502.Theotterspace.Main;
+import com.T_jav_502.Theotterspace.Map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -63,7 +64,8 @@ public class TitleScreen implements Screen {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
                 TiledMap tiledMap = new TmxMapLoader().load("Maps/test.tmx");
-                game.setScreen(new GameScreen(tiledMap));
+                Map map = new Map("../assets/Maps/mapTuto.json");
+                game.setScreen(new GameScreen(tiledMap, map));
             }
         });
 

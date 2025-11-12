@@ -5,7 +5,7 @@ import com.T_jav_502.Theotterspace.teams.*;
  */
 public class Blaster extends aUnit{
     public Blaster(Team team, int posX, int posY) {
-        super(20, 5, 4, 10 , team, posX, posY);
+        super(20, 5, 4, 10 , team, posX, posY,"miniMap");
         this.range = 2;
     }
 }
