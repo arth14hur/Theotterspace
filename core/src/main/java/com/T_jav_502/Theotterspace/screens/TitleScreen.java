@@ -19,38 +19,67 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 /**
- * Represents the title screen of the game.
+ * The {@code TitleScreen} represents the main menu displayed when the game launches.
  * <p>
- * This screen displays the game title and provides buttons to start the game or quit the application.
- * It uses {@link Stage} and Scene2D UI elements ({@link Label}, {@link TextButton}, {@link Table})
- * for layout and input handling.
+ * It provides the player with two main options:
  * </p>
+ * <ul>
+ *     <li><b>Start Game</b> — loads a {@link TiledMap} and a {@link Map} instance, then transitions to {@link GameScreen}.</li>
+ *     <li><b>Quit</b> — exits the application.</li>
+ * </ul>
+ *
  * <p>
- * The start button initializes the game by loading a TiledMap and a Map object, then sets
- * the {@link GameScreen} as the current screen.
+ * The screen uses LibGDX’s {@link Stage} and Scene2D UI system
+ * ({@link Label}, {@link TextButton}, and {@link Table}) for rendering
+ * and input handling. The interface is minimal and purely text-based.
  * </p>
- * <p>
- * The quit button exits the application.
- * </p>
+ *
+ * <h3>Usage</h3>
+ * <pre>{@code
+ * Main game = new Main();
+ * game.setScreen(new TitleScreen(game));
+ * }</pre>
+ *
+ * <p><strong>Features:</strong></p>
+ * <ul>
+ *   <li>Simple text-based main menu (no external UI skin required).</li>
+ *   <li>Scene2D-based button input handling.</li>
+ *   <li>Clean transition to {@link GameScreen} when starting.</li>
+ * </ul>
+ *
+ * @see GameScreen
+ * @see com.badlogic.gdx.scenes.scene2d.Stage
+ * @see com.badlogic.gdx.Screen
  */
 public class TitleScreen implements Screen {
 
+    /** Reference to the main game instance controlling screen transitions. */
     private final Main game;
+
+    /** Stage used for managing UI actors and handling input. */
     private Stage stage;
+
+    /** Sprite batch used for rendering text and UI. */
     private SpriteBatch batch;
+
+    /** Font used for rendering the title and button text. */
     private BitmapFont font;
 
     /**
-     * Creates a new TitleScreen for the given game.
+     * Constructs a new {@code TitleScreen}.
      *
-     * @param game the main {@link Main} game instance
+     * @param game the main {@link Main} instance controlling the screen flow
      */
     public TitleScreen(Main game) {
         this.game = game;
     }
 
     /**
-     * Initializes the screen, sets up UI elements, and registers input processors.
+     * Initializes the screen when it becomes visible.
+     * <p>
+     * Creates and configures all UI components (title label, buttons)
+     * and registers input processors with the {@link Stage}.
+     * </p>
      */
     @Override
     public void show() {
@@ -88,7 +117,7 @@ public class TitleScreen implements Screen {
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
                 TiledMap tiledMap = new TmxMapLoader().load("Maps/test.tmx");
                 Map map = new Map("../assets/Maps/mapTuto.json");
-                game.setScreen(new GameScreen(tiledMap, map, 4));
+                game.setScreen(new GameScreen(game, tiledMap, map, 4));
             }
         });
 
@@ -100,9 +129,12 @@ public class TitleScreen implements Screen {
     }
 
     /**
-     * Renders the title screen.
+     * Renders the screen every frame.
+     * <p>
+     * Clears the screen, updates stage actors, and draws the UI.
+     * </p>
      *
-     * @param delta time in seconds since the last frame
+     * @param delta the time elapsed since the last frame (in seconds)
      */
     @Override
     public void render(float delta) {
@@ -112,6 +144,12 @@ public class TitleScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Updates the viewport dimensions when the window is resized.
+     *
+     * @param width  the new width of the window
+     * @param height the new height of the window
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
@@ -122,7 +160,10 @@ public class TitleScreen implements Screen {
     @Override public void hide() {}
 
     /**
-     * Disposes resources used by this screen.
+     * Releases all LibGDX resources used by this screen.
+     * <p>
+     * Should be called when the screen is no longer needed to avoid memory leaks.
+     * </p>
      */
     @Override
     public void dispose() {
