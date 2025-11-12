@@ -18,6 +18,21 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+/**
+ * Represents the title screen of the game.
+ * <p>
+ * This screen displays the game title and provides buttons to start the game or quit the application.
+ * It uses {@link Stage} and Scene2D UI elements ({@link Label}, {@link TextButton}, {@link Table})
+ * for layout and input handling.
+ * </p>
+ * <p>
+ * The start button initializes the game by loading a TiledMap and a Map object, then sets
+ * the {@link GameScreen} as the current screen.
+ * </p>
+ * <p>
+ * The quit button exits the application.
+ * </p>
+ */
 public class TitleScreen implements Screen {
 
     private final Main game;
@@ -25,10 +40,18 @@ public class TitleScreen implements Screen {
     private SpriteBatch batch;
     private BitmapFont font;
 
+    /**
+     * Creates a new TitleScreen for the given game.
+     *
+     * @param game the main {@link Main} game instance
+     */
     public TitleScreen(Main game) {
         this.game = game;
     }
 
+    /**
+     * Initializes the screen, sets up UI elements, and registers input processors.
+     */
     @Override
     public void show() {
         batch = new SpriteBatch();
@@ -51,7 +74,7 @@ public class TitleScreen implements Screen {
         TextButton startButton = new TextButton("Commencer", buttonStyle);
         TextButton quitButton = new TextButton("Quitter", buttonStyle);
 
-        // Bouton Quitter
+        // Quit button listener
         quitButton.addListener(new ClickListener() {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
@@ -59,7 +82,7 @@ public class TitleScreen implements Screen {
             }
         });
 
-
+        // Start button listener
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
@@ -69,7 +92,6 @@ public class TitleScreen implements Screen {
             }
         });
 
-
         table.add(title).padBottom(40);
         table.row();
         table.add(startButton).width(200).height(40).padBottom(20);
@@ -77,6 +99,11 @@ public class TitleScreen implements Screen {
         table.add(quitButton).width(200).height(40);
     }
 
+    /**
+     * Renders the title screen.
+     *
+     * @param delta time in seconds since the last frame
+     */
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -85,11 +112,20 @@ public class TitleScreen implements Screen {
         stage.draw();
     }
 
-    @Override public void resize(int width, int height) { stage.getViewport().update(width, height, true); }
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
+
     @Override public void pause() {}
     @Override public void resume() {}
     @Override public void hide() {}
-    @Override public void dispose() {
+
+    /**
+     * Disposes resources used by this screen.
+     */
+    @Override
+    public void dispose() {
         stage.dispose();
         font.dispose();
         batch.dispose();
