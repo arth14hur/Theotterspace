@@ -25,7 +25,13 @@ public class Selector {
         else{
             System.out.println("Invalid coordinate");
         }
+    }
 
+    public aTile getTile() {
+        return tile;
+    }
 
+    public void setTile(aTile tile) {
+        this.tile = tile;
     }
 }
