@@ -1,7 +1,6 @@
 package com.T_jav_502.Theotterspace.screens;
 
 import com.T_jav_502.Theotterspace.Main;
-import com.T_jav_502.Theotterspace.Map;
 import com.T_jav_502.Theotterspace.inputs.ClickPosition;
 import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.tiles.Selector;
@@ -28,10 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputMultiplexer;
 
 /**
  * Represents the main in-game screen responsible for rendering the map,
@@ -77,7 +73,8 @@ public class GameScreen implements Screen {
     private final BitmapFont font = new BitmapFont();
     private final Selector selector ;
     private final Texture textureselector ;
-
+    private final float maxX ;
+    private final float maxY ;
     /** Renderer for semi-transparent overlay when paused */
     private final ShapeRenderer shapeRenderer;
 
@@ -103,7 +100,8 @@ public class GameScreen implements Screen {
         this.main = main;
         //this.map = map;
         this.renderer = new OrthogonalTiledMapRenderer(tiledMap, scale);
-        Map map = new Map(tiledMap);
+        this.maxX = tiledMap.getProperties().get("width", Integer.class);
+        this.maxY = tiledMap.getProperties().get("height", Integer.class);
 
         this.selector = new Selector();
         this.textureselector = new Texture(Gdx.files.internal("Select2.png"));
@@ -187,7 +185,7 @@ public class GameScreen implements Screen {
 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                clickPosition.update(selector);
+                clickPosition.update(selector, maxX , maxY);
                 return true;
             }
 
@@ -198,25 +196,25 @@ public class GameScreen implements Screen {
                 }
                 if (keycode == Input.Keys.DOWN) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x, co.y-1));
+                    selector.setCoordinate(new Vector2(co.x, co.y-1), maxX , maxY);
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
                 else if (keycode == Input.Keys.UP) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x, co.y+1));
+                    selector.setCoordinate(new Vector2(co.x, co.y+1), maxX , maxY);
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
                 else if (keycode == Input.Keys.LEFT) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x-1, co.y));
+                    selector.setCoordinate(new Vector2(co.x-1, co.y), maxX , maxY);
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
                 else if (keycode == Input.Keys.RIGHT) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x+1, co.y));
+                    selector.setCoordinate(new Vector2(co.x+1, co.y), maxX , maxY);
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
