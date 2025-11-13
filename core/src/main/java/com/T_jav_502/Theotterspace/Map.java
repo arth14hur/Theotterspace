@@ -6,6 +6,11 @@ import com.T_jav_502.Theotterspace.units.Heavy;
 import com.T_jav_502.Theotterspace.units.Infantry;
 import com.T_jav_502.Theotterspace.units.aUnit;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapImageLayer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
@@ -42,92 +47,31 @@ public class Map {
         SPACESHIP,
         MARS
     }
-    private final aTile[][] map;
-    private final Theme theme;
+    private aTile[][] map;
     private Team[] teams;
 
 
 
 
     //Constructor
-    public Map(String mapPath){
+    public Map(TiledMap map){
+        TiledMapTileLayer tileLayer = (TiledMapTileLayer) map.getLayers().get(0);
+        this.map = new aTile[tileLayer.getWidth()][tileLayer.getHeight()];
+        for (int x = 0; x < tileLayer.getWidth(); x++){
+            for (int y = 0; y < tileLayer.getHeight(); y++) {
+                System.out.println("Coordinates = x : " + x + ", y : " + y);
 
-        //get the json file
-        JsonReader json = new JsonReader();
-        JsonValue base = json.parse(Gdx.files.internal(mapPath));
+                if (tileLayer.getCell(x, y) != null) {
+                    System.out.println(tileLayer.getCell(x, y).getTile().getTextureRegion());
+                }
+            }
 
-        // set the tiles in the map
-        JsonValue jsonMap = base.get("map");
-        int sizeX = base.getInt("sizeX");
-        int sizeY = base.getInt("sizeY");
-        map = new aTile[sizeY][sizeX];
-        int y = 0;
-        int x = 0;
-        for (JsonValue row : jsonMap.iterator()) {
-           for ( String tile :row.asStringArray()){
-               switch (tile){
-                   case "W":
-                       map[y][x] = new Wall();
-                       break;
-                   case "F":
-                       map[y][x] = new Floor();
-                       break;
-                   case "D":
-                       map[y][x] = new DamagedFloor();
-                       break;
-                   case "C":
-                       map[y][x] = new Cover();
-                       break;
-                   default:
-                       map[y][x] = null;
-               }
-               x++;
-           }
-           x=0;
-           y++;
         }
 
-        // directly set the theme
-        this.theme = Theme.valueOf(base.getString("theme"));
-
-        //create the different teams
-        teams = new Team[2];
-        int i = 0;
-         for (JsonValue team :base.get("teams").iterator()){
-             teams[i] = new Team(Team.Species.valueOf(team.getString("species")));
-             for (JsonValue unit: team.get("units").iterator()){
-                 switch (unit.getString("type")){
-                     case "Blaster":
-                         teams[i].addUnit(new Blaster(
-                             teams[i],
-                             unit.getInt("posX"),
-                             unit.getInt("posY")
-                             ));
-                         break;
-                     case "Heavy":
-                         teams[i].addUnit(new Heavy(
-                             teams[i],
-                             unit.getInt("posX"),
-                             unit.getInt("posY")
-                         ));
-                     case "Infantry":
-                         teams[i].addUnit(new Infantry(
-                             teams[i],
-                             unit.getInt("posX"),
-                             unit.getInt("posY")
-                         ));
-                 }
-                 map[unit.getInt("posY")][unit.getInt("posX")].setOccupied(true);
-             }
-             i++;
-         }
 
     }
 
     //Getters
-    public Theme getTheme() {
-        return theme;
-    }
     public aTile[][] getMap() {
         return map;
     }

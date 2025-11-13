@@ -103,6 +103,7 @@ public class GameScreen implements Screen {
         this.main = main;
         //this.map = map;
         this.renderer = new OrthogonalTiledMapRenderer(tiledMap, scale);
+        Map map = new Map(tiledMap);
 
         this.selector = new Selector();
         this.textureselector = new Texture(Gdx.files.internal("Select2.png"));

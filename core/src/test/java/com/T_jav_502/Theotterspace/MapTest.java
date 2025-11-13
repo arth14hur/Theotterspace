@@ -19,7 +19,7 @@ class MapTest {
     Map map;
     @BeforeEach
     void setUp() {
-        map = new Map(pathToMap);
+        //map = new Map(pathToMap);
     }
     @Test
     void getTheme() {
