@@ -5,12 +5,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 //import com.badlogic.gdx.input.*;
 public class Selector {
-    private aTile tile;
-    private Texture texture;
+
+    private boolean display = true;
     private Vector2 coordinate ;
     public Selector() {
-        tile = null ;
-        texture = new Texture("Select2.png");
+
         coordinate = new Vector2(1,1);
     }
 
@@ -24,20 +23,28 @@ public class Selector {
      * @param coordinate
      */
     //to do faire en sorte que le curseur ne dépasse pas la taille max de l'ecran
-    public void setCoordinate(Vector2 coordinate) {
-        if (!(coordinate.x < 0 || coordinate.y < 0)) {
+    public void setCoordinate(Vector2 coordinate, float maxX, float maxY) {
+
+        if (!(coordinate.x < 0 || coordinate.x >= maxX || coordinate.y < 0 || coordinate.y >= maxY)) {
             this.coordinate = coordinate;
+            System.out.println("data X = " + maxX + " data Y = " + maxY);
+            if (!display) {
+                setDisplay(true);
+            }
         }
         else{
             System.out.println("Invalid coordinate");
+            System.out.println("data X = " + maxX + " data Y = " + maxY);
+            setDisplay(false);
         }
+
+    }
+    public boolean isDisplay() {
+        return display;
     }
 
-    public aTile getTile() {
-        return tile;
+    public  void setDisplay(boolean display) {
+        this.display = display;
     }
 
-    public void setTile(aTile tile) {
-        this.tile = tile;
-    }
 }

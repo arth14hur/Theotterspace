@@ -73,7 +73,8 @@ public class GameScreen implements Screen {
     private final BitmapFont font = new BitmapFont();
     private final Selector selector ;
     private final Texture textureselector ;
-
+    private final float maxX ;
+    private final float maxY ;
     /** Renderer for semi-transparent overlay when paused */
     private final ShapeRenderer shapeRenderer;
 
@@ -99,6 +100,8 @@ public class GameScreen implements Screen {
         this.main = main;
         //this.map = map;
         this.renderer = new OrthogonalTiledMapRenderer(tiledMap, scale);
+        this.maxX = tiledMap.getProperties().get("width", Integer.class);
+        this.maxY = tiledMap.getProperties().get("height", Integer.class);
 
         this.selector = new Selector();
         this.textureselector = new Texture(Gdx.files.internal("Select2.png"));
@@ -182,7 +185,7 @@ public class GameScreen implements Screen {
 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                clickPosition.update(selector);
+                clickPosition.update(selector, maxX , maxY);
                 return true;
             }
 
@@ -193,25 +196,25 @@ public class GameScreen implements Screen {
                 }
                 if (keycode == Input.Keys.DOWN) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x, co.y-1));
+                    selector.setCoordinate(new Vector2(co.x, co.y-1), maxX , maxY);
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
                 else if (keycode == Input.Keys.UP) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x, co.y+1));
+                    selector.setCoordinate(new Vector2(co.x, co.y+1), maxX , maxY);
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
                 else if (keycode == Input.Keys.LEFT) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x-1, co.y));
+                    selector.setCoordinate(new Vector2(co.x-1, co.y), maxX , maxY);
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
                 else if (keycode == Input.Keys.RIGHT) {
                     Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x+1, co.y));
+                    selector.setCoordinate(new Vector2(co.x+1, co.y), maxX , maxY);
                     System.out.println(selector.getCoordinate());
                     return true;
                 }
@@ -276,7 +279,9 @@ public class GameScreen implements Screen {
         stage.act(delta);
         stage.draw();
         renderer.getBatch().begin();
-        renderer.getBatch().draw(textureselector, selector.getCoordinate().x*32, selector.getCoordinate().y*32);
+        if (selector.isDisplay()) {
+            renderer.getBatch().draw(textureselector, selector.getCoordinate().x*32, selector.getCoordinate().y*32);
+        }
         renderer.getBatch().end();
     }
 
@@ -301,4 +306,6 @@ public class GameScreen implements Screen {
         font.dispose();
         shapeRenderer.dispose();
     }
+
+
 }
