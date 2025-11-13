@@ -18,6 +18,12 @@ public class Selector {
         return coordinate;
     }
 
+    /**
+     * bouge les coordonnées du selecteur
+     * bloque le curseur si il essaye de sortir
+     * @param coordinate
+     */
+    //to do faire en sorte que le curseur ne dépasse pas la taille max de l'ecran
     public void setCoordinate(Vector2 coordinate) {
         if (!(coordinate.x < 0 || coordinate.y < 0)) {
             this.coordinate = coordinate;
