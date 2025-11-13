@@ -277,9 +277,11 @@ public class GameScreen implements Screen {
             shapeRenderer.end();
             Gdx.gl.glDisable(GL20.GL_BLEND);
         }
-
         stage.act(delta);
         stage.draw();
+        renderer.getBatch().begin();
+        renderer.getBatch().draw(textureselector, selector.getCoordinate().x*32, selector.getCoordinate().y*32);
+        renderer.getBatch().end();
     }
 
     @Override
