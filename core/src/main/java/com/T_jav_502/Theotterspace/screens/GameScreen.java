@@ -1,7 +1,6 @@
 package com.T_jav_502.Theotterspace.screens;
 
 import com.T_jav_502.Theotterspace.Main;
-import com.T_jav_502.Theotterspace.Map;
 import com.T_jav_502.Theotterspace.inputs.ClickPosition;
 import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.tiles.Selector;
@@ -28,10 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputMultiplexer;
 
 /**
  * Represents the main in-game screen responsible for rendering the map,
