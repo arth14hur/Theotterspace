@@ -1,5 +1,6 @@
 package com.T_jav_502.Theotterspace.screens;
 
+import com.T_jav_502.Theotterspace.Main;
 import com.T_jav_502.Theotterspace.Map;
 import com.T_jav_502.Theotterspace.inputs.ClickPosition;
 import com.T_jav_502.Theotterspace.teams.Team;
@@ -184,14 +185,6 @@ public class GameScreen implements Screen {
             }
 
             @Override
-            public boolean keyDown(int keycode) {
-                if (keycode == com.badlogic.gdx.Input.Keys.ESCAPE) {
-                    togglePause(!isPaused);
-                }
-                return true;
-            }
-
-            @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
                 clickPosition.update();
                 return true;
@@ -199,6 +192,9 @@ public class GameScreen implements Screen {
 
             @Override
             public boolean keyDown(int keycode) {
+                if (keycode == com.badlogic.gdx.Input.Keys.ESCAPE) {
+                    togglePause(!isPaused);
+                }
                 if (keycode == Input.Keys.DOWN) {
                     Vector2 co = selector.getCoordinate();
                     selector.setCoordinate(new Vector2(co.x, co.y-1));
