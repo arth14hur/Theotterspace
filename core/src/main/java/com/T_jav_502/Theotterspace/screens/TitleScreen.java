@@ -104,7 +104,7 @@ public class TitleScreen implements Screen {
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
                 TiledMap tiledMap = new TmxMapLoader().load("Maps/test.tmx");
                 //Map map = new Map("../assets/Maps/mapTuto.json");
-                game.setScreen(new GameScreen(game, tiledMap, 4));
+                game.setScreen(new GameScreen(game, tiledMap, 1));
             }
         });
 
