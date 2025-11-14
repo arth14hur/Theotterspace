@@ -279,7 +279,9 @@ public class GameScreen implements Screen {
         stage.act(delta);
         stage.draw();
         renderer.getBatch().begin();
-        renderer.getBatch().draw(textureselector, selector.getCoordinate().x*32, selector.getCoordinate().y*32);
+        if (selector.isDisplay()) {
+            renderer.getBatch().draw(textureselector, selector.getCoordinate().x*32, selector.getCoordinate().y*32);
+        }
         renderer.getBatch().end();
     }
 
