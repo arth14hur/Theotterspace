@@ -1,8 +1,10 @@
 package com.T_jav_502.Theotterspace.units;
 import com.T_jav_502.Theotterspace.teams.*;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * This abstract class defines the parameters and methods of all Units.
@@ -65,7 +67,7 @@ public abstract class aUnit extends Sprite {
     /**
      * @return moved
      */
-    public boolean isMoved() {
+    public boolean hasMoved() {
         return moved;
     }
 
@@ -85,10 +87,19 @@ public abstract class aUnit extends Sprite {
 
     // Methods
 
-    public void move(Vector2 coordinates) {
-        this.coordinates = coordinates;
-        setX(coordinates.x);
-        setY(coordinates.y);
+    /**
+     * moves the unit and displays the movement of the unit
+     * @param coordinates
+     */
+    public void moveTo(Array<Vector2> coordinates) {
+        for (Vector2 coordinate : coordinates) {
+            while (this.coordinates != coordinate) {
+                this.coordinates.x = this.coordinates.x + ((coordinate.x - this.coordinates.x) / 10);
+                this.coordinates.y = this.coordinates.y + ((coordinate.y - this.coordinates.y) / 10);
+                setX(this.coordinates.x);
+                setY(this.coordinates.y);
+            }
+        }
     }
 
     @Override
@@ -103,7 +114,7 @@ public abstract class aUnit extends Sprite {
     /**
      * attack an enemy unit
      * @param opponent
-     * @return
+     * @return if unit has attacked
      */
     public boolean attack(aUnit opponent){
         //TODO: Make this method display a Fight scene.
