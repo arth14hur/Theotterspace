@@ -6,6 +6,6 @@ import com.T_jav_502.Theotterspace.teams.*;
 public class Infantry extends aUnit{
 
     public Infantry(Team team, int posX, int posY) {
-        super(25, 6, 5, 6,  team, posX, posY,"miniMap");
+        super(25, 6, 5, 6,  team, posX, posY,"Infantry");
     }
 }

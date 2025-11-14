@@ -1,7 +1,6 @@
 package com.T_jav_502.Theotterspace.units;
 import com.T_jav_502.Theotterspace.teams.*;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
@@ -21,7 +20,7 @@ public abstract class aUnit extends Sprite {
     protected Team team;
     //Constructor
     protected aUnit(int hp, int movement, int defense, int attack, Team team, int posX, int posY, String unitType) {
-        super(new Sprite(new Texture("../assets/"+unitType+ (team.getCurentSpecies() == Team.Species.OTTER ? "L" : "W") +".png")));
+        super(new Sprite(new Texture("../assets/units/"+unitType+ (team.getCurentSpecies() == Team.Species.OTTER ? "L" : "W") +".png")));
 
         this.hp = hp;
         this.movement = movement;
@@ -31,6 +30,9 @@ public abstract class aUnit extends Sprite {
         this.coordinates = new Vector2(posX, posY);
         setX(posX);
         setY(posY);
+
+        this.setSize(48,48);
+        this.translateX(-9);
     }
 
     //Getters
