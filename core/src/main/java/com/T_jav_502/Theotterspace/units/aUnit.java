@@ -96,8 +96,9 @@ public abstract class aUnit extends Sprite {
      * @param coordinates
      */
     public void moveTo(Array<Vector2> coordinates, OrthogonalTiledMapRenderer renderer) {
+        System.out.println(coordinates);
         for (Vector2 coordinate : coordinates) {
-            while ((int)this.coordinates.x*10 != (int)coordinate.x*10 && (int)this.coordinates.y*10 != (int)coordinate.y*10) {
+            while (!this.coordinates.epsilonEquals(coordinate, 0.1f)) {
                 this.coordinates.x = this.coordinates.x + ((coordinate.x - this.coordinates.x) / 10);
                 this.coordinates.y = this.coordinates.y + ((coordinate.y - this.coordinates.y) / 10);
 
@@ -109,6 +110,10 @@ public abstract class aUnit extends Sprite {
                 renderer.getBatch().end();
 
             }
+            this.coordinates.x = (int) this.coordinates.x + 0.1f;
+            this.coordinates.y = (int) this.coordinates.y + 0.1f;
+            setX(this.coordinates.x);
+            setY(this.coordinates.y);
         }
     }
 
