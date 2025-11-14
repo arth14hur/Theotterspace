@@ -2,6 +2,7 @@ package com.T_jav_502.Theotterspace.units;
 import com.T_jav_502.Theotterspace.teams.*;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
@@ -91,13 +92,19 @@ public abstract class aUnit extends Sprite {
      * moves the unit and displays the movement of the unit
      * @param coordinates
      */
-    public void moveTo(Array<Vector2> coordinates) {
+    public void moveTo(Array<Vector2> coordinates, OrthogonalTiledMapRenderer renderer) {
         for (Vector2 coordinate : coordinates) {
-            while (this.coordinates != coordinate) {
+            while ((int)this.coordinates.x*10 != (int)coordinate.x*10 && (int)this.coordinates.y*10 != (int)coordinate.y*10) {
                 this.coordinates.x = this.coordinates.x + ((coordinate.x - this.coordinates.x) / 10);
                 this.coordinates.y = this.coordinates.y + ((coordinate.y - this.coordinates.y) / 10);
+
                 setX(this.coordinates.x);
                 setY(this.coordinates.y);
+
+                renderer.getBatch().begin();
+                this.draw(renderer.getBatch());
+                renderer.getBatch().end();
+
             }
         }
     }

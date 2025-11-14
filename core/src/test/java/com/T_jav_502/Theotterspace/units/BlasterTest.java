@@ -47,7 +47,7 @@ class BlasterTest {
 
     @Test
     void isMoved() {
-        assertFalse(blaster.isMoved());
+        assertFalse(blaster.hasMoved());
     }
 
     @Test

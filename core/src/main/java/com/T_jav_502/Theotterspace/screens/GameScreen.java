@@ -1,6 +1,7 @@
 package com.T_jav_502.Theotterspace.screens;
 
 import com.T_jav_502.Theotterspace.Main;
+import com.T_jav_502.Theotterspace.PathFinder.AStarPathFinder;
 import com.T_jav_502.Theotterspace.inputs.ClickPosition;
 import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.tiles.Selector;
@@ -23,9 +24,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -234,7 +235,21 @@ public class GameScreen implements Screen {
 
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                clickPosition.update(selector, maxX , maxY);
+                if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                    Vector2 position = clickPosition.update();
+                    selector.setCoordinates(position, maxX, maxY);
+                }
+                if (selector.isDisplay() && Gdx.input.isButtonPressed(Input.Buttons.RIGHT)){
+                    Vector2 position = clickPosition.update();
+                    for (aUnit unit : teams.get(1).getUnits()){
+                        if ((int) unit.getCoordinates().x == (int) selector.getCoordinates().x && (int) unit.getCoordinates().y == (int) selector.getCoordinates().y){
+
+
+                            unit.moveTo(AStarPathFinder.findPath(selector.getCoordinates(), position, (TiledMapTileLayer) map.getLayers().get(0)), renderer);
+                        }
+                    }
+                }
+
                 return true;
             }
 
@@ -244,27 +259,27 @@ public class GameScreen implements Screen {
                     togglePause(!isPaused);
                 }
                 if (keycode == Input.Keys.DOWN) {
-                    Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x, co.y-1), maxX , maxY);
-                    System.out.println(selector.getCoordinate());
+                    Vector2 co = selector.getCoordinates();
+                    selector.setCoordinates(new Vector2(co.x, co.y-1), maxX , maxY);
+                    System.out.println(selector.getCoordinates());
                     return true;
                 }
                 else if (keycode == Input.Keys.UP) {
-                    Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x, co.y+1), maxX , maxY);
-                    System.out.println(selector.getCoordinate());
+                    Vector2 co = selector.getCoordinates();
+                    selector.setCoordinates(new Vector2(co.x, co.y+1), maxX , maxY);
+                    System.out.println(selector.getCoordinates());
                     return true;
                 }
                 else if (keycode == Input.Keys.LEFT) {
-                    Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x-1, co.y), maxX , maxY);
-                    System.out.println(selector.getCoordinate());
+                    Vector2 co = selector.getCoordinates();
+                    selector.setCoordinates(new Vector2(co.x-1, co.y), maxX , maxY);
+                    System.out.println(selector.getCoordinates());
                     return true;
                 }
                 else if (keycode == Input.Keys.RIGHT) {
-                    Vector2 co = selector.getCoordinate();
-                    selector.setCoordinate(new Vector2(co.x+1, co.y), maxX , maxY);
-                    System.out.println(selector.getCoordinate());
+                    Vector2 co = selector.getCoordinates();
+                    selector.setCoordinates(new Vector2(co.x+1, co.y), maxX , maxY);
+                    System.out.println(selector.getCoordinates());
                     return true;
                 }
                 else {
@@ -323,13 +338,13 @@ public class GameScreen implements Screen {
         stage.act(delta);
         stage.draw();
         renderer.getBatch().begin();
+        if (selector.isDisplay()) {
+            renderer.getBatch().draw(textureselector, selector.getCoordinates().x*32, selector.getCoordinates().y*32);
+        }
         for (Team team : teams) {
             for (aUnit unit : team.getUnits()) {
                 unit.draw(renderer.getBatch());
             }
-        }
-        if (selector.isDisplay()) {
-            renderer.getBatch().draw(textureselector, selector.getCoordinate().x*32, selector.getCoordinate().y*32);
         }
         renderer.getBatch().end();
     }

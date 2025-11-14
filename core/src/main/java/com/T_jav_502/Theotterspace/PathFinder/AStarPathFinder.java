@@ -1,29 +1,13 @@
 package com.T_jav_502.Theotterspace.PathFinder;
 
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class AStarPathFinder {
 
-    // Interface fonctionnelle pour vérifier si une case est praticable
-    // Cela permet à GameScreen de fournir la logique de collision
-    @FunctionalInterface
-    public interface WalkableChecker {
-        boolean isWalkable(int x, int y);
-    }
 
-    private final int width;
-    private final int height;
-    private final WalkableChecker walkableChecker;
-
-    // === CONSTRUCTEUR MODIFIÉ ===
-    public AStarPathFinder(int width, int height, WalkableChecker checker) {
-        this.width = width;
-        this.height = height;
-        this.walkableChecker = checker;
-    }
-
-    public Array<Vector2> findPath(Vector2 start, Vector2 goal) {
+    public static Array<Vector2> findPath(Vector2 start, Vector2 goal, TiledMapTileLayer layer) {
 
         Array<Node> open = new Array<>();
         Array<Node> closed = new Array<>();
@@ -46,7 +30,7 @@ public class AStarPathFinder {
 
             for (Vector2 neighbor : getNeighbors(current.position)) {
 
-                if (isBlocked(neighbor)) continue;
+                if (isBlocked(neighbor, layer)) continue;
                 if (containsPosition(closed, neighbor)) continue;
 
                 float gCost = current.gCost + 1;
@@ -70,23 +54,21 @@ public class AStarPathFinder {
         return new Array<>();
     }
 
-    private float heuristic(Vector2 a, Vector2 b) {
+    private static float heuristic(Vector2 a, Vector2 b) {
         return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     }
 
     // === ISBLOCKED MODIFIÉ ===
-    private boolean isBlocked(Vector2 pos) {
+    private static boolean isBlocked(Vector2 pos, TiledMapTileLayer layer) {
         int x = (int) pos.x;
         int y = (int) pos.y;
 
-        // Vérifie les limites de la carte
-        if (x < 0 || y < 0 || x >= width || y >= height) return true;
 
         // Utilise le "checker" fourni dans le constructeur
-        return !walkableChecker.isWalkable(x, y);
+        return !isWalkable(x, y, layer);
     }
 
-    private Array<Vector2> getNeighbors(Vector2 pos) {
+    private static Array<Vector2> getNeighbors(Vector2 pos) {
         Array<Vector2> out = new Array<>();
 
         out.add(new Vector2(pos.x + 1, pos.y));
@@ -97,21 +79,29 @@ public class AStarPathFinder {
         return out;
     }
 
-    private boolean containsPosition(Array<Node> list, Vector2 pos) {
+    private static boolean isWalkable(int x, int y, TiledMapTileLayer layer){
+        if (layer.getCell(x, y) != null){
+            return(layer.getCell(x, y).getTile().getProperties().get("walkable", Boolean.class));
+        }
+        return false;
+
+    }
+
+    private static boolean containsPosition(Array<Node> list, Vector2 pos) {
         for (Node n : list)
             if (n.position.epsilonEquals(pos, 0.1f))
                 return true;
         return false;
     }
 
-    private Node getNode(Array<Node> list, Vector2 pos) {
+    private static Node getNode(Array<Node> list, Vector2 pos) {
         for (Node n : list)
             if (n.position.epsilonEquals(pos, 0.1f))
                 return n;
         return null;
     }
 
-    private Array<Vector2> reconstructPath(Node end) {
+    private static Array<Vector2> reconstructPath(Node end) {
         Array<Vector2> path = new Array<>();
         Node current = end;
 
