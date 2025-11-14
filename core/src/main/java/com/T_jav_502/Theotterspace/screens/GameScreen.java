@@ -4,6 +4,9 @@ import com.T_jav_502.Theotterspace.Main;
 import com.T_jav_502.Theotterspace.inputs.ClickPosition;
 import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.tiles.Selector;
+import com.T_jav_502.Theotterspace.units.Blaster;
+import com.T_jav_502.Theotterspace.units.Heavy;
+import com.T_jav_502.Theotterspace.units.Infantry;
 import com.T_jav_502.Theotterspace.units.aUnit;
 import com.T_jav_502.Theotterspace.inputs.CameraDrag;
 import com.T_jav_502.Theotterspace.inputs.CameraZoom;
@@ -19,6 +22,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -27,6 +32,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /**
@@ -49,6 +55,9 @@ public class GameScreen implements Screen {
 
     /** Reference to the main application */
     private final Main main;
+
+    /** stores the map */
+    private TiledMap map;
 
     /** Camera used to render the world */
     private final OrthographicCamera camera;
@@ -87,6 +96,7 @@ public class GameScreen implements Screen {
     /** Pause menu UI elements */
     private Label pauseLabel;
     private TextButton continueButton, quitButton;
+    private Array<Team> teams = new Array<>();
 
     /**
      * Constructs the main gameplay screen.
@@ -98,7 +108,7 @@ public class GameScreen implements Screen {
      */
     public GameScreen(Main main, TiledMap tiledMap, int scale) {
         this.main = main;
-        //this.map = map;
+        this.map = tiledMap;
         this.renderer = new OrthogonalTiledMapRenderer(tiledMap, scale);
         this.maxX = tiledMap.getProperties().get("width", Integer.class);
         this.maxY = tiledMap.getProperties().get("height", Integer.class);
@@ -115,6 +125,45 @@ public class GameScreen implements Screen {
 
         camera.position.set(1280 / 2f, 720 / 2f, 0);
         this.clickPosition = new ClickPosition(camera);
+
+        /* team creation */
+        teams.add(new Team(Team.Species.OTTER));
+        teams.add(new Team(Team.Species.WOLF));
+        TiledMapTileLayer tileLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Units");
+        for ( int x  = 0; x < tileLayer.getWidth(); x++ ) {
+            for ( int y  = 0; y < tileLayer.getHeight(); y++ ) {
+                if (tileLayer.getCell(x, y) != null) {
+                     switch (tileLayer.getCell(x, y).getTile().getProperties().get("team", String.class)){
+                         case "OTTER":
+                             switch (tileLayer.getCell(x, y).getTile().getProperties().get("type", String.class)){
+                                 case "Infantry":
+                                     teams.get(0).addUnit(new Infantry(teams.get(0),x ,y));
+                                     break;
+                                 case "Blaster":
+                                     teams.get(0).addUnit(new Blaster(teams.get(0),x ,y));
+                                     break;
+                                 case "Heavy":
+                                     teams.get(0).addUnit(new Heavy(teams.get(0),x ,y));
+                                     break;
+                             }
+                             break;
+                         case "WOLF":
+                             switch (tileLayer.getCell(x, y).getTile().getProperties().get("type", String.class)){
+                                 case "Infantry":
+                                     teams.get(1).addUnit(new Infantry(teams.get(1),x ,y));
+                                     break;
+                                 case "Blaster":
+                                     teams.get(1).addUnit(new Blaster(teams.get(1),x ,y));
+                                     break;
+                                 case "Heavy":
+                                     teams.get(1).addUnit(new Heavy(teams.get(1),x ,y));
+                                     break;
+                             }
+                     }
+                }
+            }
+
+        }
 
         createUI();
         setupInput();
@@ -253,18 +302,13 @@ public class GameScreen implements Screen {
         renderer.setView(camera);
 
         // Always render the map
-        renderer.render();
+        renderer.render(new int[]{0, 1, 2});
 
         stage.act(delta);
         stage.draw();
 
 //        renderer.getBatch().begin();
-//        for (Team team : map.getTeams()) {
-//            for (aUnit unit : team.getUnits()) {
-//                unit.draw(renderer.getBatch());
-//            }
-//        }
-//        renderer.getBatch().end();
+//
         // Always render units (even when paused)
 
         // Semi-transparent overlay when paused
@@ -279,6 +323,11 @@ public class GameScreen implements Screen {
         stage.act(delta);
         stage.draw();
         renderer.getBatch().begin();
+        for (Team team : teams) {
+            for (aUnit unit : team.getUnits()) {
+                unit.draw(renderer.getBatch());
+            }
+        }
         if (selector.isDisplay()) {
             renderer.getBatch().draw(textureselector, selector.getCoordinate().x*32, selector.getCoordinate().y*32);
         }
