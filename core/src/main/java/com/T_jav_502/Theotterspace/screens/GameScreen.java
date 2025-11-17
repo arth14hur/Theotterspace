@@ -328,7 +328,7 @@ public class GameScreen implements Screen {
                     }
                 }
             }else if (path.size>0 && currentUnit != null){
-                if (!currentUnit.getCoordinates().epsilonEquals(path.get(0))){
+                if (!currentUnit.getCoordinates().epsilonEquals(path.get(0), 0.1f)){
                     if (path.get(0).x - currentUnit.getCoordinates().x > 0.1){System.out.println(path);
                 System.out.println("x - " + speed * delta);
                         currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x +(speed * delta), currentUnit.getCoordinates().y));
