@@ -8,9 +8,6 @@ import com.T_jav_502.Theotterspace.inputs.GameInputProcessor;
 import com.T_jav_502.Theotterspace.logic.BattleManager;
 import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.tiles.Selector;
-import com.T_jav_502.Theotterspace.units.Blaster;
-import com.T_jav_502.Theotterspace.units.Heavy;
-import com.T_jav_502.Theotterspace.units.Infantry;
 import com.T_jav_502.Theotterspace.units.aUnit;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -24,7 +21,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -36,10 +32,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-/**
- * Écran principal du jeu.
- * Responsabilités : Rendu graphique, Initialisation, Lien entre les Entrées et la Logique.
- */
 public class GameScreen implements Screen {
 
     private final Main main;
@@ -47,112 +39,71 @@ public class GameScreen implements Screen {
     private final OrthogonalTiledMapRenderer renderer;
     private final OrthographicCamera camera;
     private final FitViewport viewport;
+    private final Stage stage;
 
-    // -- Gestion Logique et Entrées --
+    // --- Managers ---
     private final BattleManager battleManager;
     private final GameInputProcessor inputProcessor;
 
-    // -- Outils d'interface et d'interaction --
-    private final Stage stage;
+    // --- Tools ---
     private final Selector selector;
-    private final ClickPosition clickPosition;
     private final CameraDrag cameraDrag;
     private final CameraZoom cameraZoom;
+    private final ClickPosition clickPosition;
 
-    // -- Ressources graphiques --
-    private final Texture textureSelector;
+    // --- UI & Assets ---
+    private final BitmapFont font = new BitmapFont();
     private final Sprite greenSquare;
     private final Sprite redSquare;
+    private final Texture textureSelector;
     private final ShapeRenderer shapeRenderer;
-    private final BitmapFont font;
-
-    // -- État du Screen --
-    private boolean isPaused = false;
-    private final float maxX;
-    private final float maxY;
-
-    // -- UI Pause --
     private Label pauseLabel;
-    private TextButton continueButton;
-    private TextButton quitButton;
+    private TextButton continueButton, quitButton;
+
+    private boolean isPaused = false;
+    private final float mapWidth;
+    private final float mapHeight;
 
     public GameScreen(Main main, TiledMap tiledMap, int scale) {
         this.main = main;
         this.map = tiledMap;
         this.renderer = new OrthogonalTiledMapRenderer(tiledMap, scale);
 
-        this.maxX = tiledMap.getProperties().get("width", Integer.class);
-        this.maxY = tiledMap.getProperties().get("height", Integer.class);
+        // Map Dimensions
+        this.mapWidth = tiledMap.getProperties().get("width", Integer.class);
+        this.mapHeight = tiledMap.getProperties().get("height", Integer.class);
 
-        // Initialisation de la caméra et du viewport
+        // Camera Setup
         this.camera = new OrthographicCamera();
         this.viewport = new FitViewport(1280, 720, camera);
         camera.position.set(1280 / 2f, 720 / 2f, 0);
 
-        // Initialisation des outils d'interaction
+        // Initialize Tools
+        this.stage = new Stage(new FitViewport(1280, 720));
         this.selector = new Selector();
         this.clickPosition = new ClickPosition(camera);
         this.cameraDrag = new CameraDrag(camera);
         this.cameraZoom = new CameraZoom(camera, 0.3f, 3f);
+        this.shapeRenderer = new ShapeRenderer();
 
-        // Chargement des textures
+        // Load Assets
         this.textureSelector = new Texture(Gdx.files.internal("Select2.png"));
         this.greenSquare = new Sprite(new Texture(Gdx.files.internal("green.png")));
         this.redSquare = new Sprite(new Texture(Gdx.files.internal("red.png")));
 
-        this.stage = new Stage(new FitViewport(1280, 720));
-        this.shapeRenderer = new ShapeRenderer();
-        this.font = new BitmapFont();
+        // Initialize Logic
+        this.battleManager = new BattleManager(tiledMap);
 
-        // --- Initialisation de la Logique (BattleManager) ---
-        Array<Team> teams = initializeTeams(tiledMap);
-        TiledMapTileLayer collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
-        this.battleManager = new BattleManager(teams, collisionLayer);
-
-        // --- Configuration des Inputs ---
-        this.inputProcessor = new GameInputProcessor(this, selector, cameraDrag, cameraZoom, maxX, maxY);
+        // Initialize Input
+        this.inputProcessor = new GameInputProcessor(this, selector, cameraDrag, cameraZoom, mapWidth, mapHeight);
         setupInput();
-
-        // Création de l'interface
         createUI();
-    }
-
-    /**
-     * Lit la carte Tiled pour créer les équipes et placer les unités.
-     */
-    private Array<Team> initializeTeams(TiledMap map) {
-        Array<Team> teams = new Array<>();
-        teams.add(new Team(Team.Species.OTTER));
-        teams.add(new Team(Team.Species.WOLF));
-
-        TiledMapTileLayer unitLayer = (TiledMapTileLayer) map.getLayers().get("Units");
-        if (unitLayer != null) {
-            for (int x = 0; x < unitLayer.getWidth(); x++) {
-                for (int y = 0; y < unitLayer.getHeight(); y++) {
-                    TiledMapTileLayer.Cell cell = unitLayer.getCell(x, y);
-                    if (cell != null) {
-                        String teamName = cell.getTile().getProperties().get("team", String.class);
-                        String typeName = cell.getTile().getProperties().get("type", String.class);
-
-                        if (teamName != null && typeName != null) {
-                            Team team = teamName.equals("OTTER") ? teams.get(0) : teams.get(1);
-                            switch (typeName) {
-                                case "Infantry": team.addUnit(new Infantry(team, x, y)); break;
-                                case "Blaster": team.addUnit(new Blaster(team, x, y)); break;
-                                case "Heavy": team.addUnit(new Heavy(team, x, y)); break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return teams;
     }
 
     private void setupInput() {
         InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(stage); // UI en priorité
-        multiplexer.addProcessor(inputProcessor); // Jeu ensuite
+        multiplexer.addProcessor(stage); // UI First
+        multiplexer.addProcessor(inputProcessor); // Game logic Second
         Gdx.input.setInputProcessor(multiplexer);
     }
 
@@ -169,18 +120,14 @@ public class GameScreen implements Screen {
         continueButton.setVisible(false);
         continueButton.addListener(new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                togglePause(false);
-            }
+            public void clicked(InputEvent event, float x, float y) { togglePause(false); }
         });
 
         quitButton = new TextButton("Return to Menu", buttonStyle);
         quitButton.setVisible(false);
         quitButton.addListener(new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                main.setScreen(new TitleScreen(main));
-            }
+            public void clicked(InputEvent event, float x, float y) { main.setScreen(new TitleScreen(main)); }
         });
 
         Table table = new Table();
@@ -194,56 +141,50 @@ public class GameScreen implements Screen {
     }
 
     public void togglePause(boolean pause) {
-        this.isPaused = pause;
+        isPaused = pause;
         pauseLabel.setVisible(pause);
         continueButton.setVisible(pause);
         quitButton.setVisible(pause);
     }
 
-    public boolean isPaused() {
-        return isPaused;
-    }
+    public boolean isPaused() { return isPaused; }
 
     @Override
     public void render(float delta) {
-        // 1. Mise à jour
+        // 1. UPDATE
         camera.update();
 
         if (!isPaused) {
-            // Gestion des clics (Sélection / Déplacement) via BattleManager
+            // Mouse Handling via clickPosition -> BattleManager
             if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-                Vector2 pos = clickPosition.update();
-                selector.setCoordinates(pos, maxX, maxY);
-                battleManager.handleInteraction(pos, false); // False = Clic gauche (Sélection)
+                Vector2 tilePos = clickPosition.update();
+                selector.setCoordinates(tilePos, mapWidth, mapHeight);
+                battleManager.selectTile(tilePos);
             }
             else if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
-                Vector2 pos = clickPosition.update();
-                battleManager.handleInteraction(pos, true); // True = Clic droit (Action/Move)
+                Vector2 tilePos = clickPosition.update();
+                battleManager.actionAtTile(tilePos);
             }
 
-            // Mise à jour de la logique de combat (animations, etc.)
+            // Game Logic Update
             battleManager.update(delta);
         }
 
-        // 2. Rendu Graphique
+        // 2. DRAW
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         viewport.apply();
         renderer.setView(camera);
-
-        // Rendu de la carte
-        renderer.render(new int[]{0, 1, 2});
+        renderer.render(new int[]{0, 1, 2}); // Draw Map Layers
 
         renderer.getBatch().begin();
 
-        // Affichage des portées (Mouvement / Attaque)
-        // Note: BattleManager utilise MovementCalculator en interne pour remplir ces listes
+        // Draw Ranges (from BattleManager)
         Array<Vector2> moves = battleManager.getMovementRange();
         if (moves != null) {
             for (Vector2 pos : moves) {
-                greenSquare.setX(pos.x * 32);
-                greenSquare.setY(pos.y * 32);
+                greenSquare.setPosition(pos.x * 32, pos.y * 32);
                 greenSquare.draw(renderer.getBatch());
             }
         }
@@ -251,18 +192,17 @@ public class GameScreen implements Screen {
         Array<Vector2> attacks = battleManager.getAttackRange();
         if (attacks != null) {
             for (Vector2 pos : attacks) {
-                redSquare.setX(pos.x * 32);
-                redSquare.setY(pos.y * 32);
+                redSquare.setPosition(pos.x * 32, pos.y * 32);
                 redSquare.draw(renderer.getBatch());
             }
         }
 
-        // Affichage du sélecteur
+        // Draw Selector
         if (selector.isDisplay()) {
             renderer.getBatch().draw(textureSelector, selector.getCoordinates().x * 32, selector.getCoordinates().y * 32);
         }
 
-        // Affichage des unités
+        // Draw Units (Iterate through teams)
         for (Team team : battleManager.getTeams()) {
             for (aUnit unit : team.getUnits()) {
                 unit.draw(renderer.getBatch());
@@ -271,7 +211,7 @@ public class GameScreen implements Screen {
 
         renderer.getBatch().end();
 
-        // 3. UI Overlay (Pause)
+        // 3. DRAW UI (Pause Overlay)
         if (isPaused) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -303,10 +243,8 @@ public class GameScreen implements Screen {
         stage.dispose();
         font.dispose();
         shapeRenderer.dispose();
-
-        // Libération des textures manuelles
         textureSelector.dispose();
-        if (greenSquare.getTexture() != null) greenSquare.getTexture().dispose();
-        if (redSquare.getTexture() != null) redSquare.getTexture().dispose();
+        greenSquare.getTexture().dispose();
+        redSquare.getTexture().dispose();
     }
 }

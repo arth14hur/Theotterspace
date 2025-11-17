@@ -2,167 +2,144 @@ package com.T_jav_502.Theotterspace.logic;
 
 import com.T_jav_502.Theotterspace.PathFinder.AStarPathFinder;
 import com.T_jav_502.Theotterspace.teams.Team;
-import com.T_jav_502.Theotterspace.units.aUnit;
+import com.T_jav_502.Theotterspace.units.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-/**
- * Cerveau central de la logique de combat.
- * Gère le tour par tour, la sélection, les déplacements et les règles du jeu.
- * Découplé de l'affichage (GameScreen).
- */
 public class BattleManager {
-
-    private final Array<Team> teams;
-    private final TiledMapTileLayer collisionLayer; // Nécessaire pour le pathfinding
-
+    private Array<Team> teams;
     private int currentTurnIndex = 0;
+
+    // État de la sélection
     private aUnit selectedUnit = null;
-    private aUnit movingUnit = null; // Unité en cours de déplacement (animation)
-
+    private aUnit movingUnit = null;
     private Array<Vector2> currentPath = new Array<>();
-    private Array<Vector2> movementRange = new Array<>();
-    private Array<Vector2> attackRange = new Array<>();
 
-    private final int unitSpeed = 10; // Vitesse de déplacement visuel
+    // Portées calculées pour l'affichage
+    private Array<Vector2> movementRange;
+    private Array<Vector2> attackRange;
 
-    /**
-     * @param teams La liste des équipes en jeu.
-     * @param collisionLayer La couche de la carte utilisée pour vérifier les collisions.
-     */
-    public BattleManager(Array<Team> teams, TiledMapTileLayer collisionLayer) {
-        this.teams = teams;
-        this.collisionLayer = collisionLayer;
+    private final TiledMapTileLayer collisionLayer;
+
+    public BattleManager(TiledMap tiledMap) {
+        this.collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0); // Floor layer
+        this.teams = new Array<>();
+        initializeTeams(tiledMap);
     }
 
-    /**
-     * Méthode principale de mise à jour logique (appelée par render).
-     * Gère l'animation de déplacement.
-     * @param delta Temps écoulé depuis la dernière frame.
-     */
-    public void update(float delta) {
-        if (movingUnit != null && currentPath.size > 0) {
-            // On délègue le mouvement "physique" à l'unité
-            currentPath = movingUnit.moveTo(currentPath, unitSpeed, delta);
+    /** Extrait la logique de création d'équipe du GameScreen */
+    private void initializeTeams(TiledMap map) {
+        teams.add(new Team(Team.Species.OTTER));
+        teams.add(new Team(Team.Species.WOLF));
 
-            // Si le chemin est vide, le mouvement est fini
+        TiledMapTileLayer unitLayer = (TiledMapTileLayer) map.getLayers().get("Units");
+        if (unitLayer != null) {
+            for (int x = 0; x < unitLayer.getWidth(); x++) {
+                for (int y = 0; y < unitLayer.getHeight(); y++) {
+                    if (unitLayer.getCell(x, y) != null) {
+                        String teamName = unitLayer.getCell(x, y).getTile().getProperties().get("team", String.class);
+                        String typeName = unitLayer.getCell(x, y).getTile().getProperties().get("type", String.class);
+
+                        if (teamName != null && typeName != null) {
+                            Team currentTeam = teamName.equals("OTTER") ? teams.get(0) : teams.get(1);
+                            switch (typeName) {
+                                case "Infantry": currentTeam.addUnit(new Infantry(currentTeam, x, y)); break;
+                                case "Blaster": currentTeam.addUnit(new Blaster(currentTeam, x, y)); break;
+                                case "Heavy": currentTeam.addUnit(new Heavy(currentTeam, x, y)); break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void update(float delta) {
+        // Gestion de l'animation de mouvement
+        if (movingUnit != null && currentPath.size > 0) {
+            currentPath = movingUnit.moveTo(currentPath, 10, delta); // 10 = vitesse
             if (currentPath.size == 0) {
+                movingUnit.setMoved(true);
+                movingUnit.setColor(Color.GRAY); // Indique visuellement que l'unité a joué
                 movingUnit = null;
-                // Ici, on pourrait déclencher la fin de l'action de l'unité
                 deselectUnit();
             }
         }
     }
 
-    /**
-     * Gère une interaction (clic) sur une tuile donnée.
-     * @param tileCoordinate Coordonnées de la tuile cliquée.
-     * @param isRightClick Indique s'il s'agit d'un clic droit (action) ou gauche (sélection).
-     */
-    public void handleInteraction(Vector2 tileCoordinate, boolean isRightClick) {
-        // Si une unité est en train de bouger, on bloque les inputs
-        if (movingUnit != null) return;
+    // Appelé par GameScreen lors d'un clic GAUCHE
+    public void selectTile(Vector2 position) {
+        if (movingUnit != null) return; // On bloque si une unité bouge déjà
 
-        if (isRightClick) {
-            tryMoveUnit(tileCoordinate);
-        } else {
-            trySelectUnit(tileCoordinate);
-        }
-    }
+        // Vérifier si on clique sur une unité
+        aUnit clickedUnit = getUnitAt(position);
 
-    /**
-     * Tente de sélectionner une unité à la position donnée.
-     */
-    private void trySelectUnit(Vector2 position) {
-        Team currentTeam = getCurrentTeam();
-        aUnit unitFound = null;
-
-        // Cherche si une unité de l'équipe active est sur la case
-        for (aUnit unit : currentTeam.getUnits()) {
-            // Attention à la comparaison de float, cast en int pour être sûr d'être sur la tuile
-            if ((int)unit.getCoordinates().x == (int)position.x &&
-                (int)unit.getCoordinates().y == (int)position.y) {
-                unitFound = unit;
-                break;
-            }
-        }
-
-        if (unitFound != null) {
-            selectUnit(unitFound);
+        if (clickedUnit != null && clickedUnit.getTeam() == getCurrentTeam() && !clickedUnit.hasMoved()) {
+            // Sélectionner une unité alliée non fatiguée
+            selectedUnit = clickedUnit;
+            // Calculer les portées via MovementCalculator
+            movementRange = MovementCalculator.getAccessibleTiles(selectedUnit, collisionLayer, false);
+            attackRange = MovementCalculator.getAccessibleTiles(selectedUnit, collisionLayer, true);
         } else {
             deselectUnit();
         }
     }
 
-    /**
-     * Tente de déplacer l'unité sélectionnée vers la destination.
-     */
-    private void tryMoveUnit(Vector2 destination) {
-        if (selectedUnit == null) return;
+    // Appelé par GameScreen lors d'un clic DROIT (Action)
+    public void actionAtTile(Vector2 position) {
+        if (selectedUnit == null || movingUnit != null) return;
 
-        // Vérifie si la destination est dans la portée calculée
-        if (movementRange != null && movementRange.contains(destination, false)) {
-            // Calcul du chemin
-            currentPath = AStarPathFinder.findPath(
-                selectedUnit.getCoordinates(),
-                destination,
-                collisionLayer
-            );
-
-            if (currentPath.size > 0) {
-                movingUnit = selectedUnit;
-                // On ne désélectionne pas tout de suite, on attend la fin du mouvement
+        // Logique de déplacement
+        if (movementRange != null && contains(movementRange, position)) {
+            // Vérifier que la case n'est pas occupée par une autre unité
+            if (getUnitAt(position) == null) {
+                currentPath = AStarPathFinder.findPath(selectedUnit.getCoordinates(), position, collisionLayer);
+                if (currentPath.size > 0) {
+                    movingUnit = selectedUnit; // Démarre l'animation dans update()
+                }
             }
         }
     }
 
-    private void selectUnit(aUnit unit) {
-        this.selectedUnit = unit;
-        // Utilisation du MovementCalculator refactorisé
-        this.movementRange = MovementCalculator.getAccessibleTiles(unit, collisionLayer, false);
-        this.attackRange = MovementCalculator.getAccessibleTiles(unit, collisionLayer, true);
-    }
-
     public void deselectUnit() {
-        this.selectedUnit = null;
-        this.movementRange = null;
-        this.attackRange = null;
+        selectedUnit = null;
+        movementRange = null;
+        attackRange = null;
     }
 
-    /**
-     * Passe au tour de l'équipe suivante.
-     */
     public void endTurn() {
         deselectUnit();
-
-        // Réinitialiser les unités de l'équipe qui vient de finir
-        // Note: Il faudra ajouter une méthode resetTurn() dans aUnit pour remettre moved=false
-        // for (aUnit unit : getCurrentTeam().getUnits()) { unit.resetTurn(); }
-
+        // Réinitialiser les unités de l'équipe actuelle
+        for (aUnit u : getCurrentTeam().getUnits()) {
+            u.resetTurn();
+        }
+        // Changer d'équipe
         currentTurnIndex = (currentTurnIndex + 1) % teams.size;
-        System.out.println("Tour de l'équipe : " + getCurrentTeam().getCurentSpecies());
+        System.out.println("Turn: " + getCurrentTeam().getCurentSpecies());
     }
 
-    // --- Getters pour l'affichage (GameScreen) ---
-
-    public Team getCurrentTeam() {
-        return teams.get(currentTurnIndex);
+    private aUnit getUnitAt(Vector2 pos) {
+        for (Team t : teams) {
+            for (aUnit u : t.getUnits()) {
+                if ((int)u.getCoordinates().x == (int)pos.x && (int)u.getCoordinates().y == (int)pos.y) {
+                    return u;
+                }
+            }
+        }
+        return null;
     }
 
-    public Array<Team> getTeams() {
-        return teams;
-    }
+    public Team getCurrentTeam() { return teams.get(currentTurnIndex); }
+    public Array<Team> getTeams() { return teams; }
+    public Array<Vector2> getMovementRange() { return movementRange; }
+    public Array<Vector2> getAttackRange() { return attackRange; }
 
-    public aUnit getSelectedUnit() {
-        return selectedUnit;
-    }
-
-    public Array<Vector2> getMovementRange() {
-        return movementRange;
-    }
-
-    public Array<Vector2> getAttackRange() {
-        return attackRange;
+    // Helper pour Array<Vector2> qui manque parfois de méthode contains simple
+    private boolean contains(Array<Vector2> list, Vector2 v) {
+        for(Vector2 item : list) if(item.equals(v)) return true;
+        return false;
     }
 }
