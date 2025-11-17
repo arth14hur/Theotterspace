@@ -356,29 +356,8 @@ public class GameScreen implements Screen {
                 unitDefence = null ;
             }
 
-            if (selector.isDisplay() && Gdx.input.isButtonPressed(Input.Buttons.RIGHT)){
-                Vector2 position = clickPosition.update();
-                for (aUnit unit : teams.get(0).getUnits()){
-                    if ((int) unit.getCoordinates().x == (int) selector.getCoordinates().x && (int) unit.getCoordinates().y == (int) selector.getCoordinates().y){
-                        path = AStarPathFinder.findPath(selector.getCoordinates(), position, (TiledMapTileLayer) map.getLayers().get(0));
-                        currentUnit = unit;
-                    }
-                }
-            }else if (path.size>0 && currentUnit != null){
-                if (!currentUnit.getCoordinates().epsilonEquals(path.get(0), 0.1f)){
-                    if (path.get(0).x - currentUnit.getCoordinates().x > 0.1){
-                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x +(speed * delta), currentUnit.getCoordinates().y));
-                    }else if (path.get(0).x - currentUnit.getCoordinates().x < -0.1){
-                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x -(speed * delta), currentUnit.getCoordinates().y));
-                    }else if (path.get(0).y - currentUnit.getCoordinates().y > 0.1){
-                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x, currentUnit.getCoordinates().y +(speed * delta)));
-                    }else if (path.get(0).y - currentUnit.getCoordinates().y < -0.1){
-                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x, currentUnit.getCoordinates().y -(speed * delta)));
-                    }
-                }else{
-                    currentUnit.moveTo(path.get(0));
-                    path.removeIndex(0);
-                }
+
+
         // unit movement
             if (path.size>0 && currentUnit != null){
                 path = currentUnit.moveTo(path, speed, delta);
@@ -416,6 +395,7 @@ public class GameScreen implements Screen {
 
             }
         }
+
 
     //
             // Always render units (even when paused)
