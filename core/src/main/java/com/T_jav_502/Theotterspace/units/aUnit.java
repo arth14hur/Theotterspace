@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Array;
 
 public abstract class aUnit extends Sprite {
     protected int hp;
-    protected int maxHp;
+    protected int maxHp; // Stocke la vie maximale pour le calcul de la barre de vie
     protected int movement;
     protected int defense;
     protected int attack;
@@ -21,7 +21,7 @@ public abstract class aUnit extends Sprite {
     protected aUnit(int hp, int movement, int defense, int attack, Team team, int posX, int posY, String unitType) {
         super(new Sprite(new Texture("units/"+unitType+ (team.getCurentSpecies() == Team.Species.OTTER ? "L" : "W") +".png")));
         this.hp = hp;
-        this.maxHp = hp;
+        this.maxHp = hp; // Initialisation des PV max
         this.movement = movement;
         this.defense = defense;
         this.attack = attack;
