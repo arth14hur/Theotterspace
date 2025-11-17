@@ -106,7 +106,7 @@ public abstract class aUnit extends Sprite {
         this.coordinates = coordinates;
         setX(coordinates.x);
         setY(coordinates.y);
-
+        this.translateX(-9);
     }
 
     @Override
