@@ -13,24 +13,25 @@ public class BattleManager {
     private Array<Team> teams;
     private int currentTurnIndex = 0;
 
-    // État de la sélection
     private aUnit selectedUnit = null;
     private aUnit movingUnit = null;
     private Array<Vector2> currentPath = new Array<>();
 
-    // Portées calculées pour l'affichage
     private Array<Vector2> movementRange;
     private Array<Vector2> attackRange;
 
     private final TiledMapTileLayer collisionLayer;
 
     public BattleManager(TiledMap tiledMap) {
-        this.collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0); // Floor layer
+        if (tiledMap.getLayers().getCount() > 0) {
+            this.collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+        } else {
+            throw new RuntimeException("La TiledMap ne contient aucun layer !");
+        }
         this.teams = new Array<>();
         initializeTeams(tiledMap);
     }
 
-    /** Extrait la logique de création d'équipe du GameScreen */
     private void initializeTeams(TiledMap map) {
         teams.add(new Team(Team.Species.OTTER));
         teams.add(new Team(Team.Species.WOLF));
@@ -58,29 +59,34 @@ public class BattleManager {
     }
 
     public void update(float delta) {
-        // Gestion de l'animation de mouvement
         if (movingUnit != null && currentPath.size > 0) {
-            currentPath = movingUnit.moveTo(currentPath, 10, delta); // 10 = vitesse
+            currentPath = movingUnit.moveTo(currentPath, 10, delta);
+
             if (currentPath.size == 0) {
                 movingUnit.setMoved(true);
-                movingUnit.setColor(Color.GRAY); // Indique visuellement que l'unité a joué
+                // Recalculer les portées après mouvement
+                movementRange = MovementCalculator.getAccessibleTiles(movingUnit, collisionLayer, false);
+                attackRange = MovementCalculator.getAccessibleTiles(movingUnit, collisionLayer, true);
+
+                selectedUnit = movingUnit; // L'unité reste sélectionnée après le mouvement
                 movingUnit = null;
-                deselectUnit();
+
+                // Si l'unité ne peut plus attaquer, on termine son tour
+                if (selectedUnit.hasAttacked()) {
+                    finishUnitTurn(selectedUnit);
+                }
             }
         }
     }
 
-    // Appelé par GameScreen lors d'un clic GAUCHE
     public void selectTile(Vector2 position) {
-        if (movingUnit != null) return; // On bloque si une unité bouge déjà
+        if (movingUnit != null) return;
 
-        // Vérifier si on clique sur une unité
         aUnit clickedUnit = getUnitAt(position);
 
-        if (clickedUnit != null && clickedUnit.getTeam() == getCurrentTeam() && !clickedUnit.hasMoved()) {
-            // Sélectionner une unité alliée non fatiguée
+        // Sélection si unité alliée et pas encore attaqué
+        if (clickedUnit != null && clickedUnit.getTeam() == getCurrentTeam() && !clickedUnit.hasAttacked()) {
             selectedUnit = clickedUnit;
-            // Calculer les portées via MovementCalculator
             movementRange = MovementCalculator.getAccessibleTiles(selectedUnit, collisionLayer, false);
             attackRange = MovementCalculator.getAccessibleTiles(selectedUnit, collisionLayer, true);
         } else {
@@ -88,20 +94,50 @@ public class BattleManager {
         }
     }
 
-    // Appelé par GameScreen lors d'un clic DROIT (Action)
     public void actionAtTile(Vector2 position) {
         if (selectedUnit == null || movingUnit != null) return;
 
-        // Logique de déplacement
-        if (movementRange != null && contains(movementRange, position)) {
-            // Vérifier que la case n'est pas occupée par une autre unité
-            if (getUnitAt(position) == null) {
+        aUnit targetUnit = getUnitAt(position);
+
+        // CAS 1 : ATTAQUE (Unité présente sur la case cible)
+        if (targetUnit != null) {
+            if (targetUnit.getTeam() != getCurrentTeam()
+                && !selectedUnit.hasAttacked()
+                && attackRange != null
+                && contains(attackRange, position)) {
+
+                performAttack(selectedUnit, targetUnit);
+            }
+        }
+        // CAS 2 : DÉPLACEMENT (Case vide)
+        else {
+            if (movementRange != null && contains(movementRange, position) && !selectedUnit.hasMoved()) {
                 currentPath = AStarPathFinder.findPath(selectedUnit.getCoordinates(), position, collisionLayer);
                 if (currentPath.size > 0) {
-                    movingUnit = selectedUnit; // Démarre l'animation dans update()
+                    movingUnit = selectedUnit;
                 }
             }
         }
+    }
+
+    private void performAttack(aUnit attacker, aUnit defender) {
+        System.out.println("Attacking unit at " + defender.getCoordinates());
+        defender.receiveDamage(attacker.getAttack());
+
+        attacker.setAttacked(true);
+        attacker.setMoved(true); // Une attaque termine le mouvement
+
+        if (defender.getHp() <= 0) {
+            defender.getTeam().removeUnit(defender);
+            System.out.println("Target eliminated!");
+        }
+
+        finishUnitTurn(attacker);
+    }
+
+    private void finishUnitTurn(aUnit unit) {
+        unit.setColor(Color.GRAY);
+        deselectUnit();
     }
 
     public void deselectUnit() {
@@ -112,11 +148,9 @@ public class BattleManager {
 
     public void endTurn() {
         deselectUnit();
-        // Réinitialiser les unités de l'équipe actuelle
         for (aUnit u : getCurrentTeam().getUnits()) {
             u.resetTurn();
         }
-        // Changer d'équipe
         currentTurnIndex = (currentTurnIndex + 1) % teams.size;
         System.out.println("Turn: " + getCurrentTeam().getCurentSpecies());
     }
@@ -137,9 +171,11 @@ public class BattleManager {
     public Array<Vector2> getMovementRange() { return movementRange; }
     public Array<Vector2> getAttackRange() { return attackRange; }
 
-    // Helper pour Array<Vector2> qui manque parfois de méthode contains simple
     private boolean contains(Array<Vector2> list, Vector2 v) {
-        for(Vector2 item : list) if(item.equals(v)) return true;
+        if (list == null) return false;
+        for(Vector2 item : list) {
+            if((int)item.x == (int)v.x && (int)item.y == (int)v.y) return true;
+        }
         return false;
     }
 }
