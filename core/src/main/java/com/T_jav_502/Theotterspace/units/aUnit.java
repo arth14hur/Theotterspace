@@ -2,7 +2,6 @@ package com.T_jav_502.Theotterspace.units;
 import com.T_jav_502.Theotterspace.teams.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.Texture;
@@ -83,6 +82,13 @@ public abstract class aUnit extends Sprite {
         return coordinates;
     }
 
+    /**
+     * @return team
+     */
+    public Team getTeam() {
+        return team;
+    }
+
     //setters
 
     public void setCoordinates(int posX, int posY) {
@@ -120,7 +126,8 @@ public abstract class aUnit extends Sprite {
      * @return if unit has attacked
      */
     public boolean attack(aUnit opponent){
-        //TODO: Make this method display a Fight scene.
+        // TODO: The GameScreen/UI system should detect that an attack happened
+        // and trigger the display of the Fight scene here.
         if (isAtRange(opponent)){
             opponent.receiveDamage(attack);
             return true;
@@ -140,25 +147,47 @@ public abstract class aUnit extends Sprite {
         }
     }
 
-    /**
-     * @return team
-     */
-    public Team getTeam() {
-        return team;
-    }
 
     /**
      * return a boolean if a unit is in range
      * @param opponent
-     * @return
+     * @return true if the opponent is within the unit's attack range (Manhattan distance)
      */
     protected boolean isAtRange(aUnit opponent){
-        //TODO: Fix once tiles are implemented.
-        return true;
+        // Calculate Manhattan distance (distance en nombre de cases)
+        int dx = (int) Math.abs(coordinates.x - opponent.coordinates.x);
+        int dy = (int) Math.abs(coordinates.y - opponent.coordinates.y);
+
+        return (dx + dy) <= range;
     }
 
+    /**
+     * Returns all tile coordinates within the unit's attack range for visualization.
+     * This is used to display the translucent red tiles.
+     * @param mapWidth The width of the map (in tiles).
+     * @param mapHeight The height of the map (in tiles).
+     * @return Array of Vector2 (tile coordinates) that are in range.
+     */
+    public Array<Vector2> getTilesInRange(int mapWidth, int mapHeight) {
+        Array<Vector2> rangeTiles = new Array<>();
+        int currentX = (int) coordinates.x;
+        int currentY = (int) coordinates.y;
 
+        for (int i = -range; i <= range; i++) {
+            for (int j = -range; j <= range; j++) {
+                // Use Manhattan distance check
+                if (Math.abs(i) + Math.abs(j) <= range) {
+                    int checkX = currentX + i;
+                    int checkY = currentY + j;
 
-
-
+                    // Check bounds
+                    if (checkX >= 0 && checkX < mapWidth && checkY >= 0 && checkY < mapHeight) {
+                        // We must add a new Vector2 instance
+                        rangeTiles.add(new Vector2(checkX, checkY));
+                    }
+                }
+            }
+        }
+        return rangeTiles;
+    }
 }
