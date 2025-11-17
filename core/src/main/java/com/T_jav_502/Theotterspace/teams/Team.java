@@ -1,6 +1,8 @@
 package com.T_jav_502.Theotterspace.teams;
 
 import com.T_jav_502.Theotterspace.units.*;
+import com.badlogic.gdx.utils.Array;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,7 @@ public class Team {
     private final Species curentSpecies;
 
     /** List of units that belong to this team. */
-    private List<aUnit> unitList = new ArrayList<>();
+    private Array<aUnit> unitList = new Array<>();
 
     /**
      * Constructs a new Team with the specified species.
@@ -51,10 +53,17 @@ public class Team {
      *
      * @return list of {@link aUnit} objects
      */
-    public List<aUnit> getUnits() {
+    public Array<aUnit> getUnits() {
         return unitList;
     }
 
+    /** Delete a unit
+     *
+     * @param unit
+     */
+    public void deleteUnit(aUnit unit) {
+        unitList.removeValue(unit, true);
+    }
     /**
      * Adds a unit to this team.
      *

@@ -109,6 +109,9 @@ public class GameScreen implements Screen {
     private Label pauseLabel;
     private TextButton continueButton, quitButton;
     private Array<Team> teams = new Array<>();
+    /** variables des attaques TO DO a bouger*/
+    private aUnit unitAttack ;
+    private aUnit unitDefence;
 
     /**
      * Constructs the main gameplay screen.
@@ -321,10 +324,61 @@ public class GameScreen implements Screen {
             stage.draw();
 
 
+            //if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            //    Vector2 position = clickPosition.update();
+            //    selector.setCoordinates(position, maxX, maxY);
+            //}
+
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-                Vector2 position = clickPosition.update();
-                selector.setCoordinates(position, maxX, maxY);
+                Vector2 positionUnit = clickPosition.update();
+                for (aUnit unit : teams.get(0).getUnits()){
+                    if ((int) unit.getCoordinates().x == (int) selector.getCoordinates().x && (int) unit.getCoordinates().y == (int) selector.getCoordinates().y){
+                        unitAttack = unit ;
+
+                    }
+
+                }
+                if (unitAttack != null) {
+                    for (aUnit unit2 : teams.get(1).getUnits()) {
+                        if ((int) unit2.getCoordinates().x == (int) positionUnit.x && (int) unit2.getCoordinates().y == (int) positionUnit.y) {
+                            unitDefence =  unit2 ;
+                        }
+
+                    }
+                    if (unitDefence != null) {
+                        if (unitAttack.isAtRange(unitDefence)) {
+                            unitAttack.attack(unitDefence);
+                            System.out.println(unitDefence.getHp());
+                        }
+                    }
+                }
+                unitAttack = null ;
+                unitDefence = null ;
             }
+
+            if (selector.isDisplay() && Gdx.input.isButtonPressed(Input.Buttons.RIGHT)){
+                Vector2 position = clickPosition.update();
+                for (aUnit unit : teams.get(0).getUnits()){
+                    if ((int) unit.getCoordinates().x == (int) selector.getCoordinates().x && (int) unit.getCoordinates().y == (int) selector.getCoordinates().y){
+                        path = AStarPathFinder.findPath(selector.getCoordinates(), position, (TiledMapTileLayer) map.getLayers().get(0));
+                        currentUnit = unit;
+                    }
+                }
+            }else if (path.size>0 && currentUnit != null){
+                if (!currentUnit.getCoordinates().epsilonEquals(path.get(0), 0.1f)){
+                    if (path.get(0).x - currentUnit.getCoordinates().x > 0.1){
+                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x +(speed * delta), currentUnit.getCoordinates().y));
+                    }else if (path.get(0).x - currentUnit.getCoordinates().x < -0.1){
+                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x -(speed * delta), currentUnit.getCoordinates().y));
+                    }else if (path.get(0).y - currentUnit.getCoordinates().y > 0.1){
+                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x, currentUnit.getCoordinates().y +(speed * delta)));
+                    }else if (path.get(0).y - currentUnit.getCoordinates().y < -0.1){
+                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x, currentUnit.getCoordinates().y -(speed * delta)));
+                    }
+                }else{
+                    currentUnit.moveTo(path.get(0));
+                    path.removeIndex(0);
+                }
         // unit movement
             if (path.size>0 && currentUnit != null){
                 path = currentUnit.moveTo(path, speed, delta);
@@ -383,7 +437,12 @@ public class GameScreen implements Screen {
             }
             for (Team team : teams) {
                 for (aUnit unit : team.getUnits()) {
-                    unit.draw(renderer.getBatch());
+                    if(unit.getHp() <= 0){
+                        team.deleteUnit(unit);
+                    }
+                    else{
+                        unit.draw(renderer.getBatch());
+                    }
                 }
             }
         renderer.getBatch().end();
