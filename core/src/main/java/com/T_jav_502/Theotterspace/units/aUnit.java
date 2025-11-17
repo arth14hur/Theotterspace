@@ -103,8 +103,6 @@ public abstract class aUnit extends Sprite {
      * @param coordinates
      */
     public void moveTo(Vector2 coordinates) {
-        System.out.println(coordinates);
-
         this.coordinates = coordinates;
         setX(coordinates.x);
         setY(coordinates.y);

@@ -329,26 +329,18 @@ public class GameScreen implements Screen {
                 }
             }else if (path.size>0 && currentUnit != null){
                 if (!currentUnit.getCoordinates().epsilonEquals(path.get(0), 0.1f)){
-                    if (path.get(0).x - currentUnit.getCoordinates().x > 0.1){System.out.println(path);
-                System.out.println("x - " + speed * delta);
+                    if (path.get(0).x - currentUnit.getCoordinates().x > 0.1){
                         currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x +(speed * delta), currentUnit.getCoordinates().y));
                     }else if (path.get(0).x - currentUnit.getCoordinates().x < -0.1){
-                        System.out.println("x + " + speed * delta);
                         currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x -(speed * delta), currentUnit.getCoordinates().y));
                     }else if (path.get(0).y - currentUnit.getCoordinates().y > 0.1){
-                        System.out.println("y - " + speed * delta);
                         currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x, currentUnit.getCoordinates().y +(speed * delta)));
                     }else if (path.get(0).y - currentUnit.getCoordinates().y < -0.1){
-                        System.out.println("y + " + speed * delta);
                         currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x, currentUnit.getCoordinates().y -(speed * delta)));
                     }
-                    else System.out.println("failed changing coordinates");
                 }else{
-                    System.out.println("paths : " + path);
-                    System.out.println(path.get(0) + " path removed");
                     currentUnit.moveTo(path.get(0));
                     path.removeIndex(0);
-                    System.out.println("paths : " + path);
                 }
                 if (path.size == 0){
                     currentUnit = null;
