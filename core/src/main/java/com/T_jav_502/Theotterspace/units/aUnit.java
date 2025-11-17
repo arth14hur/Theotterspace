@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Array;
 public abstract class aUnit extends Sprite {
     //attributes
     protected int hp;
+    protected int maxHp;
     protected int movement;
     protected int defense;
     protected int attack;
@@ -20,11 +21,13 @@ public abstract class aUnit extends Sprite {
     protected boolean moved = false;
     protected Vector2 coordinates;
     protected Team team;
+    protected boolean haveAttack = true;
     //Constructor
     protected aUnit(int hp, int movement, int defense, int attack, Team team, int posX, int posY, String unitType) {
         super(new Sprite(new Texture("../assets/units/"+unitType+ (team.getCurentSpecies() == Team.Species.OTTER ? "L" : "W") +".png")));
 
         this.hp = hp;
+        this.maxHp = hp;
         this.movement = movement;
         this.defense = defense;
         this.attack = attack;
@@ -89,13 +92,20 @@ public abstract class aUnit extends Sprite {
         return team;
     }
 
+    /**
+     * @return haveAttack
+     */
+
+    public boolean getHaveAttack() { return haveAttack ; }
     //setters
 
     public void setCoordinates(int posX, int posY) {
         this.coordinates = new Vector2(posX, posY);
     }
 
-
+    public void setHaveAttack(boolean haveAttack) {
+        this.haveAttack = haveAttack;
+    }
     // Methods
 
     /**
@@ -126,9 +136,12 @@ public abstract class aUnit extends Sprite {
     public boolean attack(aUnit opponent){
         // TODO: The GameScreen/UI system should detect that an attack happened
         // and trigger the display of the Fight scene here.
-        if (isAtRange(opponent)){
-            opponent.receiveDamage(attack);
-            return true;
+        if (haveAttack) {
+            if (isAtRange(opponent)) {
+                opponent.receiveDamage(attack);
+                setHaveAttack(false);
+                return true;
+            }
         }
         return false;
     }
@@ -139,9 +152,19 @@ public abstract class aUnit extends Sprite {
      */
     public void receiveDamage(int damage){
         if (damage <= defense && damage >0 ){
-            hp -= 1;
+            if (hp-1 < 0){
+                hp = 0 ;
+            }
+            else {
+                hp -= 1;
+            }
         }else if  (damage > 0){
-            hp -= (damage - defense);
+            if (hp - (damage - defense) < 0){
+                hp = 0 ;
+            }
+            else {
+                hp -= (damage - defense);
+            }
         }
     }
 
@@ -151,7 +174,7 @@ public abstract class aUnit extends Sprite {
      * @param opponent
      * @return true if the opponent is within the unit's attack range (Manhattan distance)
      */
-    protected boolean isAtRange(aUnit opponent){
+    public boolean isAtRange(aUnit opponent){
         // Calculate Manhattan distance (distance en nombre de cases)
         int dx = (int) Math.abs(coordinates.x - opponent.coordinates.x);
         int dy = (int) Math.abs(coordinates.y - opponent.coordinates.y);
