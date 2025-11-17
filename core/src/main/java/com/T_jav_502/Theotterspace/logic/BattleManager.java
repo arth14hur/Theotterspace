@@ -21,6 +21,7 @@ public class BattleManager {
     private Array<Vector2> attackRange;
 
     private final TiledMapTileLayer collisionLayer;
+    private final BattleAI battleAI; // Référence vers le cerveau de l'IA
 
     public BattleManager(TiledMap tiledMap) {
         if (tiledMap.getLayers().getCount() > 0) {
@@ -30,12 +31,15 @@ public class BattleManager {
         }
         this.teams = new Array<>();
         initializeTeams(tiledMap);
+
+        // Initialisation de l'IA
+        this.battleAI = new BattleAI(this, collisionLayer);
     }
 
     private void initializeTeams(TiledMap map) {
-        teams.add(new Team(Team.Species.OTTER));
-        teams.add(new Team(Team.Species.WOLF));
-
+        teams.add(new Team(Team.Species.OTTER, false)); // Joueur
+        teams.add(new Team(Team.Species.WOLF, true));  // IA
+        // ... (Reste de l'initialisation des unités identique) ...
         TiledMapTileLayer unitLayer = (TiledMapTileLayer) map.getLayers().get("Units");
         if (unitLayer != null) {
             for (int x = 0; x < unitLayer.getWidth(); x++) {
@@ -59,79 +63,94 @@ public class BattleManager {
     }
 
     public void update(float delta) {
+        // 1. Gestion Prioritaire : Animation de mouvement
         if (movingUnit != null && currentPath.size > 0) {
             currentPath = movingUnit.moveTo(currentPath, 10, delta);
 
             if (currentPath.size == 0) {
                 movingUnit.setMoved(true);
-                // Recalculer les portées après mouvement
                 movementRange = MovementCalculator.getAccessibleTiles(movingUnit, collisionLayer, false);
                 attackRange = MovementCalculator.getAccessibleTiles(movingUnit, collisionLayer, true);
-
-                selectedUnit = movingUnit; // L'unité reste sélectionnée après le mouvement
+                selectedUnit = movingUnit;
                 movingUnit = null;
 
-                // Si l'unité ne peut plus attaquer, on termine son tour
                 if (selectedUnit.hasAttacked()) {
                     finishUnitTurn(selectedUnit);
                 }
             }
+            return; // Bloque tout le reste pendant l'animation
+        }
+
+        // 2. Si c'est le tour de l'IA, on délègue à la classe BattleAI
+        if (getCurrentTeam().isAi()) {
+            battleAI.update(delta);
         }
     }
 
+    // --- Gestion des Inputs Joueur ---
+
     public void selectTile(Vector2 position) {
-        if (movingUnit != null) return;
+        if (movingUnit != null || getCurrentTeam().isAi()) return; // Bloqué si IA joue
 
         aUnit clickedUnit = getUnitAt(position);
-
-        // Sélection si unité alliée et pas encore attaqué
         if (clickedUnit != null && clickedUnit.getTeam() == getCurrentTeam() && !clickedUnit.hasAttacked()) {
-            selectedUnit = clickedUnit;
-            movementRange = MovementCalculator.getAccessibleTiles(selectedUnit, collisionLayer, false);
-            attackRange = MovementCalculator.getAccessibleTiles(selectedUnit, collisionLayer, true);
+            forceSelectUnit(clickedUnit);
         } else {
             deselectUnit();
         }
     }
 
     public void actionAtTile(Vector2 position) {
+        // Note : On enlève la protection "isAi" ici si c'est l'IA qui appelle cette méthode via BattleAI
+        // Mais pour sécuriser, l'IA appelle directement les logiques internes ou on laisse ouvert.
+        // Pour simplifier : si c'est le joueur, selectTile bloque déjà l'interaction.
+
         if (selectedUnit == null || movingUnit != null) return;
 
         aUnit targetUnit = getUnitAt(position);
-
-        // CAS 1 : ATTAQUE (Unité présente sur la case cible)
         if (targetUnit != null) {
-            if (targetUnit.getTeam() != getCurrentTeam()
-                && !selectedUnit.hasAttacked()
-                && attackRange != null
-                && contains(attackRange, position)) {
-
+            if (targetUnit.getTeam() != getCurrentTeam() && !selectedUnit.hasAttacked()
+                && attackRange != null && contains(attackRange, position)) {
                 performAttack(selectedUnit, targetUnit);
             }
-        }
-        // CAS 2 : DÉPLACEMENT (Case vide)
-        else {
+        } else {
             if (movementRange != null && contains(movementRange, position) && !selectedUnit.hasMoved()) {
-                currentPath = AStarPathFinder.findPath(selectedUnit.getCoordinates(), position, collisionLayer);
-                if (currentPath.size > 0) {
-                    movingUnit = selectedUnit;
+                // Vérifier collision unité
+                if (getUnitAt(position) == null) {
+                    currentPath = AStarPathFinder.findPath(selectedUnit.getCoordinates(), position, collisionLayer);
+                    if (currentPath.size > 0) {
+                        movingUnit = selectedUnit;
+                    }
                 }
             }
         }
     }
 
-    private void performAttack(aUnit attacker, aUnit defender) {
-        System.out.println("Attacking unit at " + defender.getCoordinates());
-        defender.receiveDamage(attacker.getAttack());
+    // --- Méthodes "Publiques" pour l'IA (Interface de commande) ---
 
+    /** Permet à l'IA de sélectionner une unité logiciellement */
+    public void forceSelectUnit(aUnit unit) {
+        this.selectedUnit = unit;
+        this.movementRange = MovementCalculator.getAccessibleTiles(unit, collisionLayer, false);
+        this.attackRange = MovementCalculator.getAccessibleTiles(unit, collisionLayer, true);
+    }
+
+    /** Permet à l'IA de finir le tour d'une unité */
+    public void forceFinishTurn(aUnit unit) {
+        finishUnitTurn(unit);
+    }
+
+    // --- Logique Interne ---
+
+    private void performAttack(aUnit attacker, aUnit defender) {
+        System.out.println(attacker.getClass().getSimpleName() + " attaque " + defender.getClass().getSimpleName());
+        defender.receiveDamage(attacker.getAttack());
         attacker.setAttacked(true);
-        attacker.setMoved(true); // Une attaque termine le mouvement
+        attacker.setMoved(true);
 
         if (defender.getHp() <= 0) {
             defender.getTeam().removeUnit(defender);
-            System.out.println("Target eliminated!");
         }
-
         finishUnitTurn(attacker);
     }
 
@@ -152,7 +171,7 @@ public class BattleManager {
             u.resetTurn();
         }
         currentTurnIndex = (currentTurnIndex + 1) % teams.size;
-        System.out.println("Turn: " + getCurrentTeam().getCurentSpecies());
+        System.out.println("Nouveau tour : " + getCurrentTeam().getCurentSpecies());
     }
 
     private aUnit getUnitAt(Vector2 pos) {
@@ -170,6 +189,7 @@ public class BattleManager {
     public Array<Team> getTeams() { return teams; }
     public Array<Vector2> getMovementRange() { return movementRange; }
     public Array<Vector2> getAttackRange() { return attackRange; }
+    public aUnit getSelectedUnit() { return selectedUnit; } // Nécessaire pour l'IA
 
     private boolean contains(Array<Vector2> list, Vector2 v) {
         if (list == null) return false;
