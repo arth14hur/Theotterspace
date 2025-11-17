@@ -3,6 +3,7 @@ import com.T_jav_502.Theotterspace.teams.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
@@ -100,13 +101,71 @@ public abstract class aUnit extends Sprite {
 
     /**
      * moves the unit and displays the movement of the unit
-     * @param coordinates
+     * @param path, speed and delta
      */
-    public void moveTo(Vector2 coordinates) {
-        this.coordinates = coordinates;
+    public Array<Vector2> moveTo(Array<Vector2> path, int speed, float delta) {
+        if (!getCoordinates().epsilonEquals(path.get(0), 0.1f)){
+            if (path.get(0).x - getCoordinates().x > 0.1){
+                this.coordinates.x = getCoordinates().x +(speed * delta);
+            }else if (path.get(0).x -  getCoordinates().x < -0.1){
+                this.coordinates.x = getCoordinates().x -(speed * delta);
+            }else if (path.get(0).y -  getCoordinates().y > 0.1){
+                this.coordinates.y = getCoordinates().y +(speed * delta);
+            }else if (path.get(0).y -  getCoordinates().y < -0.1){
+                this.coordinates.y = getCoordinates().y -(speed * delta);
+            }
+        }else{
+            this.coordinates = path.get(0);
+            path.removeIndex(0);
+        }
         setX(coordinates.x);
         setY(coordinates.y);
         this.translateX(-9);
+
+        return path;
+    }
+
+    public Array<Vector2> whereCanWalk(TiledMapTileLayer layer, boolean atk) {
+        Array<Vector2> output = new Array<>();
+        output.add(coordinates);
+        Array<Vector2> bufferOutput = new Array<>();
+        Array<Vector2> atkOutput = new Array<>();
+        Array<Vector2> directions = new Array<>();
+        directions.add(new Vector2(0,-1));
+        directions.add(new Vector2(0,1));
+        directions.add(new Vector2(-1, 0));
+        directions.add(new Vector2(1, 0));
+        Vector2 bufferPosition = new Vector2();
+        int mvt = movement;
+        if (atk) mvt += range;
+
+        while (mvt > 0) {
+            for (Vector2 position : output) {
+                for (Vector2 direction : directions) {
+                    bufferPosition.x = direction.x + position.x;
+                    bufferPosition.y = direction.y + position.y;
+
+                    if (layer.getCell((int) bufferPosition.x, (int) bufferPosition.y) != null && !output.contains(bufferPosition, false)) {
+                        if (layer.getCell((int) bufferPosition.x, (int) bufferPosition.y).getTile().getProperties().get("walkable", Boolean.class)) {
+                            bufferOutput.add(new Vector2(bufferPosition.x, bufferPosition.y));
+                        }
+                    }
+                }
+            }
+            for (Vector2 out : bufferOutput) {
+                if (!output.contains(out, false)) {
+                    output.add(out);
+                    if (atk && mvt <= range && !atkOutput.contains(out, false)) atkOutput.add(out);
+                }
+            }
+            bufferOutput.clear();
+            mvt --;
+        }
+
+
+        output.removeIndex(0);
+        if (atk) return atkOutput;
+        else return output;
     }
 
     @Override

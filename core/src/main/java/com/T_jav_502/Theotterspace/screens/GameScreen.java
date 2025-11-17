@@ -21,6 +21,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -57,11 +58,18 @@ public class GameScreen implements Screen {
     private final Main main;
 
     /** stores the map */
-    private TiledMap map;
+    private final TiledMap map;
 
     private aUnit currentUnit = null;
-    private Array<Vector2> path = new Array<Vector2>();
-    private int speed = 10;
+    private Array<Vector2> path = new Array<>();
+    private final int speed = 10;
+    private int turn = 0;
+    private Array<Vector2> mvtRange;
+    private Array<Vector2> atkRange;
+    private Sprite greenSquare = new Sprite(new Texture(Gdx.files.internal("../assets/green.png")));
+    private Sprite redSquare = new Sprite(new Texture(Gdx.files.internal("../assets/red.png")));
+
+
 
     /** Camera used to render the world */
     private final OrthographicCamera camera;
@@ -308,7 +316,7 @@ public class GameScreen implements Screen {
 
         // Always render the map
         renderer.render(new int[]{0, 1, 2});
-
+        renderer.getBatch().begin();
             stage.act(delta);
             stage.draw();
 
@@ -317,35 +325,44 @@ public class GameScreen implements Screen {
                 Vector2 position = clickPosition.update();
                 selector.setCoordinates(position, maxX, maxY);
             }
-
-            if (selector.isDisplay() && Gdx.input.isButtonPressed(Input.Buttons.RIGHT)){
-                Vector2 position = clickPosition.update();
-                for (aUnit unit : teams.get(1).getUnits()){
-                    if ((int) unit.getCoordinates().x == (int) selector.getCoordinates().x && (int) unit.getCoordinates().y == (int) selector.getCoordinates().y){
-                        path = AStarPathFinder.findPath(selector.getCoordinates(), position, (TiledMapTileLayer) map.getLayers().get(0));
-                        currentUnit = unit;
-                    }
-                }
-            }else if (path.size>0 && currentUnit != null){
-                if (!currentUnit.getCoordinates().epsilonEquals(path.get(0), 0.1f)){
-                    if (path.get(0).x - currentUnit.getCoordinates().x > 0.1){
-                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x +(speed * delta), currentUnit.getCoordinates().y));
-                    }else if (path.get(0).x - currentUnit.getCoordinates().x < -0.1){
-                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x -(speed * delta), currentUnit.getCoordinates().y));
-                    }else if (path.get(0).y - currentUnit.getCoordinates().y > 0.1){
-                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x, currentUnit.getCoordinates().y +(speed * delta)));
-                    }else if (path.get(0).y - currentUnit.getCoordinates().y < -0.1){
-                        currentUnit.moveTo(new Vector2(currentUnit.getCoordinates().x, currentUnit.getCoordinates().y -(speed * delta)));
-                    }
-                }else{
-                    currentUnit.moveTo(path.get(0));
-                    path.removeIndex(0);
-                }
+        // unit movement
+            if (path.size>0 && currentUnit != null){
+                path = currentUnit.moveTo(path, speed, delta);
                 if (path.size == 0){
                     currentUnit = null;
                 }
+            }
+            //render green zone if unit is selected
+        for (aUnit unit : teams.get(turn).getUnits()){
+            if ((int) unit.getCoordinates().x == (int) selector.getCoordinates().x && (int) unit.getCoordinates().y == (int) selector.getCoordinates().y){
+                mvtRange = unit.whereCanWalk((TiledMapTileLayer)map.getLayers().get(0), false);
+                for (Vector2 point : mvtRange){
+                    greenSquare.setX(point.x * 32);
+                    greenSquare.setY(point.y * 32);
+                    greenSquare.draw(renderer.getBatch());
+                }
+                atkRange = unit.whereCanWalk((TiledMapTileLayer)map.getLayers().get(0), true);
+                for (Vector2 point : atkRange){
+                    redSquare.setX(point.x * 32);
+                    redSquare.setY(point.y * 32);
+                    redSquare.draw(renderer.getBatch());
+                }
+            }else {
+                mvtRange = null;
+                atkRange = null;
+            }
+
+
+            if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) && mvtRange != null){
+                Vector2 position = clickPosition.update();
+                if (mvtRange.contains(position, false)){
+                    path = AStarPathFinder.findPath(selector.getCoordinates(), position, (TiledMapTileLayer) map.getLayers().get(0));
+                    currentUnit = unit;
+                }
 
             }
+        }
+
     //
             // Always render units (even when paused)
 
@@ -360,7 +377,7 @@ public class GameScreen implements Screen {
             }
             stage.act(delta);
             stage.draw();
-            renderer.getBatch().begin();
+
             if (selector.isDisplay()) {
                 renderer.getBatch().draw(textureselector, selector.getCoordinates().x*32, selector.getCoordinates().y*32);
             }
