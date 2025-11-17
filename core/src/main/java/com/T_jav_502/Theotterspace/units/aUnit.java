@@ -19,6 +19,7 @@ public abstract class aUnit extends Sprite {
     protected int attack;
     protected int range = 1;
     protected boolean moved = false;
+    protected boolean attacked = false;
     protected Vector2 coordinates;
     protected Team team;
     //Constructor
@@ -75,6 +76,9 @@ public abstract class aUnit extends Sprite {
     public boolean hasMoved() {
         return moved;
     }
+    public boolean hasAttacked() {
+        return attacked;
+    }
 
     /**
      * @return coordinates
@@ -121,7 +125,7 @@ public abstract class aUnit extends Sprite {
         setX(coordinates.x);
         setY(coordinates.y);
         this.translateX(-9);
-
+        moved = true;
         return path;
     }
 
@@ -136,8 +140,9 @@ public abstract class aUnit extends Sprite {
         directions.add(new Vector2(-1, 0));
         directions.add(new Vector2(1, 0));
         Vector2 bufferPosition = new Vector2();
-        int mvt = movement;
-        if (atk) mvt += range;
+        int mvt = 0;
+        if (!hasMoved())mvt = movement;
+        if (atk && !hasAttacked()) mvt += range;
 
         while (mvt > 0) {
             for (Vector2 position : output) {
