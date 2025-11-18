@@ -1,13 +1,15 @@
 package com.T_jav_502.Theotterspace.PathFinder;
 
+import com.T_jav_502.Theotterspace.teams.Team; // Import nécessaire
+import com.T_jav_502.Theotterspace.units.aUnit; // Import nécessaire
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class AStarPathFinder {
 
-
-    public static Array<Vector2> findPath(Vector2 start, Vector2 goal, TiledMapTileLayer layer) {
+    // On ajoute le paramètre 'teams' pour connaître la position des unités
+    public static Array<Vector2> findPath(Vector2 start, Vector2 goal, TiledMapTileLayer layer, Array<Team> teams) {
 
         Array<Node> open = new Array<>();
         Array<Node> closed = new Array<>();
@@ -30,7 +32,8 @@ public class AStarPathFinder {
 
             for (Vector2 neighbor : getNeighbors(current.position)) {
 
-                if (isBlocked(neighbor, layer)) continue;
+                // On passe 'teams' à isBlocked
+                if (isBlocked(neighbor, layer, teams)) continue;
                 if (containsPosition(closed, neighbor)) continue;
 
                 float gCost = current.gCost + 1;
@@ -59,13 +62,29 @@ public class AStarPathFinder {
     }
 
     // === ISBLOCKED MODIFIÉ ===
-    private static boolean isBlocked(Vector2 pos, TiledMapTileLayer layer) {
+    // Ajout de la vérification des unités
+    private static boolean isBlocked(Vector2 pos, TiledMapTileLayer layer, Array<Team> teams) {
         int x = (int) pos.x;
         int y = (int) pos.y;
 
+        // 1. Vérifier si le terrain est marchable (Murs, vide, objets statiques de la map)
+        if (!isWalkable(x, y, layer)) {
+            return true;
+        }
 
-        // Utilise le "checker" fourni dans le constructeur
-        return !isWalkable(x, y, layer);
+        // 2. Vérifier si une unité occupe cette case
+        if (teams != null) {
+            for (Team team : teams) {
+                for (aUnit unit : team.getUnits()) {
+                    // On vérifie les coordonnées (en entiers pour être sûr)
+                    if ((int)unit.getCoordinates().x == x && (int)unit.getCoordinates().y == y) {
+                        return true; // La case est bloquée par une unité
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private static Array<Vector2> getNeighbors(Vector2 pos) {
@@ -81,10 +100,10 @@ public class AStarPathFinder {
 
     private static boolean isWalkable(int x, int y, TiledMapTileLayer layer){
         if (layer.getCell(x, y) != null){
+            // Vérifie la propriété "walkable" définie dans Tiled
             return(layer.getCell(x, y).getTile().getProperties().get("walkable", Boolean.class));
         }
         return false;
-
     }
 
     private static boolean containsPosition(Array<Node> list, Vector2 pos) {

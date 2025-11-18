@@ -117,7 +117,7 @@ public class BattleManager {
             if (movementRange != null && contains(movementRange, position) && !selectedUnit.hasMoved()) {
                 // Vérifier collision unité
                 if (getUnitAt(position) == null) {
-                    currentPath = AStarPathFinder.findPath(selectedUnit.getCoordinates(), position, collisionLayer);
+                    currentPath = AStarPathFinder.findPath(selectedUnit.getCoordinates(), position, collisionLayer, teams);
                     if (currentPath.size > 0) {
                         movingUnit = selectedUnit;
                     }
