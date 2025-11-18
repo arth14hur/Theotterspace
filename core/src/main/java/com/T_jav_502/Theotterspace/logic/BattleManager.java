@@ -21,9 +21,12 @@ public class BattleManager {
     private Array<Vector2> attackRange;
 
     private final TiledMapTileLayer collisionLayer;
-    private final BattleAI battleAI; // Référence vers le cerveau de l'IA
+    private TiledMap tiledMap; // Variable stockant la carte complète
+    private final BattleAI battleAI;
 
     public BattleManager(TiledMap tiledMap) {
+        this.tiledMap = tiledMap; // Initialisation de la variable
+
         if (tiledMap.getLayers().getCount() > 0) {
             this.collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
         } else {
@@ -39,7 +42,7 @@ public class BattleManager {
     private void initializeTeams(TiledMap map) {
         teams.add(new Team(Team.Species.OTTER, false)); // Joueur
         teams.add(new Team(Team.Species.WOLF, true));  // IA
-        // ... (Reste de l'initialisation des unités identique) ...
+
         TiledMapTileLayer unitLayer = (TiledMapTileLayer) map.getLayers().get("Units");
         if (unitLayer != null) {
             for (int x = 0; x < unitLayer.getWidth(); x++) {
@@ -101,10 +104,6 @@ public class BattleManager {
     }
 
     public void actionAtTile(Vector2 position) {
-        // Note : On enlève la protection "isAi" ici si c'est l'IA qui appelle cette méthode via BattleAI
-        // Mais pour sécuriser, l'IA appelle directement les logiques internes ou on laisse ouvert.
-        // Pour simplifier : si c'est le joueur, selectTile bloque déjà l'interaction.
-
         if (selectedUnit == null || movingUnit != null) return;
 
         aUnit targetUnit = getUnitAt(position);
@@ -117,7 +116,14 @@ public class BattleManager {
             if (movementRange != null && contains(movementRange, position) && !selectedUnit.hasMoved()) {
                 // Vérifier collision unité
                 if (getUnitAt(position) == null) {
-                    currentPath = AStarPathFinder.findPath(selectedUnit.getCoordinates(), position, collisionLayer, teams);
+                    // Utilisation de la TiledMap complète et des équipes pour le pathfinding
+                    currentPath = AStarPathFinder.findPath(
+                        selectedUnit.getCoordinates(),
+                        position,
+                        this.tiledMap,
+                        getTeams()
+                    );
+
                     if (currentPath.size > 0) {
                         movingUnit = selectedUnit;
                     }
@@ -189,7 +195,7 @@ public class BattleManager {
     public Array<Team> getTeams() { return teams; }
     public Array<Vector2> getMovementRange() { return movementRange; }
     public Array<Vector2> getAttackRange() { return attackRange; }
-    public aUnit getSelectedUnit() { return selectedUnit; } // Nécessaire pour l'IA
+    public aUnit getSelectedUnit() { return selectedUnit; }
 
     private boolean contains(Array<Vector2> list, Vector2 v) {
         if (list == null) return false;
