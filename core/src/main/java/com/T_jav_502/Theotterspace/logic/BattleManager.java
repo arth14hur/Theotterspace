@@ -20,7 +20,7 @@ public class BattleManager {
     private Array<Vector2> movementRange;
     private Array<Vector2> attackRange;
 
-    private final TiledMapTileLayer collisionLayer;
+    private final TiledMapTileLayer floorLayer;
     private TiledMap tiledMap; // Variable stockant la carte complète
     private final BattleAI battleAI;
 
@@ -28,7 +28,7 @@ public class BattleManager {
         this.tiledMap = tiledMap; // Initialisation de la variable
 
         if (tiledMap.getLayers().getCount() > 0) {
-            this.collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
+            this.floorLayer = (TiledMapTileLayer) tiledMap.getLayers().get(0);
         } else {
             throw new RuntimeException("La TiledMap ne contient aucun layer !");
         }
@@ -36,7 +36,7 @@ public class BattleManager {
         initializeTeams(tiledMap);
 
         // Initialisation de l'IA
-        this.battleAI = new BattleAI(this, collisionLayer);
+        this.battleAI = new BattleAI(this, floorLayer);
     }
 
     private void initializeTeams(TiledMap map) {
@@ -65,6 +65,10 @@ public class BattleManager {
         }
     }
 
+    public Team getOpponentTeam() {
+        return teams.get((currentTurnIndex + 1)%2);
+    }
+
     public void update(float delta) {
         // 1. Gestion Prioritaire : Animation de mouvement
         if (movingUnit != null && currentPath.size > 0) {
@@ -72,8 +76,8 @@ public class BattleManager {
 
             if (currentPath.size == 0) {
                 movingUnit.setMoved(true);
-                movementRange = MovementCalculator.getAccessibleTiles(movingUnit, collisionLayer, false);
-                attackRange = MovementCalculator.getAccessibleTiles(movingUnit, collisionLayer, true);
+                movementRange = movingUnit.whereCanWalk(floorLayer, false, getOpponentTeam());
+                attackRange = movingUnit.whereCanWalk(floorLayer, true, getOpponentTeam());
                 selectedUnit = movingUnit;
                 movingUnit = null;
 
@@ -109,19 +113,19 @@ public class BattleManager {
         aUnit targetUnit = getUnitAt(position);
         if (targetUnit != null) {
             if (targetUnit.getTeam() != getCurrentTeam() && !selectedUnit.hasAttacked()
-                && attackRange != null && contains(attackRange, position)) {
+                && contains(attackRange, position)) {
                 performAttack(selectedUnit, targetUnit);
             }
         } else {
-            if (movementRange != null && contains(movementRange, position) && !selectedUnit.hasMoved()) {
+            if (contains(movementRange, position) && !selectedUnit.hasMoved()) {
                 // Vérifier collision unité
                 if (getUnitAt(position) == null) {
                     // Utilisation de la TiledMap complète et des équipes pour le pathfinding
                     currentPath = AStarPathFinder.findPath(
                         selectedUnit.getCoordinates(),
                         position,
-                        this.tiledMap,
-                        getTeams()
+                        floorLayer,
+                        getOpponentTeam()
                     );
 
                     if (currentPath.size > 0) {
@@ -137,8 +141,8 @@ public class BattleManager {
     /** Permet à l'IA de sélectionner une unité logiciellement */
     public void forceSelectUnit(aUnit unit) {
         this.selectedUnit = unit;
-        this.movementRange = MovementCalculator.getAccessibleTiles(unit, collisionLayer, false);
-        this.attackRange = MovementCalculator.getAccessibleTiles(unit, collisionLayer, true);
+        this.movementRange = unit.whereCanWalk(floorLayer, false, getOpponentTeam());
+        this.attackRange = unit.whereCanWalk(floorLayer, true, getOpponentTeam());
     }
 
     /** Permet à l'IA de finir le tour d'une unité */
@@ -149,7 +153,6 @@ public class BattleManager {
     // --- Logique Interne ---
 
     private void performAttack(aUnit attacker, aUnit defender) {
-        System.out.println(attacker.getClass().getSimpleName() + " attaque " + defender.getClass().getSimpleName());
         defender.receiveDamage(attacker.getAttack());
         attacker.setAttacked(true);
         attacker.setMoved(true);
@@ -177,7 +180,6 @@ public class BattleManager {
             u.resetTurn();
         }
         currentTurnIndex = (currentTurnIndex + 1) % teams.size;
-        System.out.println("Nouveau tour : " + getCurrentTeam().getCurentSpecies());
     }
 
     private aUnit getUnitAt(Vector2 pos) {
