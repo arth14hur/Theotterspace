@@ -2,22 +2,14 @@ package com.T_jav_502.Theotterspace.PathFinder;
 
 import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.units.aUnit;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.tiled.TiledMap; // On importe TiledMap
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class AStarPathFinder {
 
-    /**
-     * Trouve un chemin en prenant en compte les unités (teams) et tous les obstacles de la TiledMap.
-     * @param start Position de départ
-     * @param goal Position d'arrivée
-     * @param map La carte complète (TiledMap) pour vérifier tous les calques
-     * @param teams La liste des équipes pour éviter les unités
-     */
-    public static Array<Vector2> findPath(Vector2 start, Vector2 goal, TiledMap map, Array<Team> teams) {
+
+    public static Array<Vector2> findPath(Vector2 start, Vector2 goal, TiledMapTileLayer layer, Team enemyTeam) {
 
         Array<Node> open = new Array<>();
         Array<Node> closed = new Array<>();
@@ -40,8 +32,7 @@ public class AStarPathFinder {
 
             for (Vector2 neighbor : getNeighbors(current.position)) {
 
-                // On passe maintenant la 'map' complète
-                if (isBlocked(neighbor, map, teams)) continue;
+                if (isBlocked(neighbor, layer, enemyTeam)) continue;
                 if (containsPosition(closed, neighbor)) continue;
 
                 float gCost = current.gCost + 1;
@@ -69,77 +60,31 @@ public class AStarPathFinder {
         return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     }
 
-    private static boolean isBlocked(Vector2 pos, TiledMap map, Array<Team> teams) {
-        int x = (int) pos.x;
-        int y = (int) pos.y;
+    private static boolean isBlocked(Vector2 pos, TiledMapTileLayer layer,Team enemyTeam) {
 
-        // 1. Vérification de la Carte (Murs, Objets, Vide)
-        // On vérifie si la case est marchable sur la map
-        if (!isWalkableOnMap(x, y, map)) {
-            return true;
+        for (aUnit unit : enemyTeam.getUnits()) {
+            if (unit.getCoordinates().epsilonEquals(pos)) return false;
         }
-
-        // 2. Vérification des Unités (Dynamique)
-        if (teams != null) {
-            for (Team team : teams) {
-                for (aUnit unit : team.getUnits()) {
-                    if ((int)unit.getCoordinates().x == x && (int)unit.getCoordinates().y == y) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Vérifie tous les calques de la map à la position x,y.
-     * Retourne TRUE si on peut marcher (sol présent + pas d'obstacle).
-     */
-    private static boolean isWalkableOnMap(int x, int y, TiledMap map) {
-        boolean hasFloor = false; // Est-ce qu'il y a du sol ?
-
-        // On parcourt tous les calques de la carte
-        for (MapLayer mapLayer : map.getLayers()) {
-            // On ne s'intéresse qu'aux calques de tuiles (pas les calques d'objets/images)
-            if (mapLayer instanceof TiledMapTileLayer) {
-                TiledMapTileLayer layer = (TiledMapTileLayer) mapLayer;
-
-                // Vérifier les limites du calque
-                if (x < 0 || x >= layer.getWidth() || y < 0 || y >= layer.getHeight()) {
-                    continue;
-                }
-
-                TiledMapTileLayer.Cell cell = layer.getCell(x, y);
-                if (cell != null && cell.getTile() != null) {
-                    // Si la tuile a la propriété "walkable"
-                    if (cell.getTile().getProperties().containsKey("walkable")) {
-                        boolean walkable = cell.getTile().getProperties().get("walkable", Boolean.class);
-
-                        // Si une seule couche dit "NON" (walkable = false), c'est bloqué (ex: mur, objet)
-                        if (!walkable) {
-                            return false;
-                        }
-
-                        // Si une couche dit "OUI", c'est qu'il y a du sol
-                        hasFloor = true;
-                    }
-                }
-            }
-        }
-
-        // Pour marcher, il faut au moins un sol (hasFloor) et aucun obstacle (géré par le return false ci-dessus)
-        return hasFloor;
+        return !isWalkable(pos, layer);
     }
 
     private static Array<Vector2> getNeighbors(Vector2 pos) {
         Array<Vector2> out = new Array<>();
+
         out.add(new Vector2(pos.x + 1, pos.y));
         out.add(new Vector2(pos.x - 1, pos.y));
         out.add(new Vector2(pos.x, pos.y + 1));
         out.add(new Vector2(pos.x, pos.y - 1));
+
         return out;
+    }
+
+    private static boolean isWalkable(Vector2 pos, TiledMapTileLayer layer){
+        if (layer.getCell((int) pos.x, (int) pos.y) != null){
+            return(layer.getCell((int) pos.x, (int) pos.y).getTile().getProperties().get("walkable", Boolean.class));
+        }
+        return false;
+
     }
 
     private static boolean containsPosition(Array<Node> list, Vector2 pos) {
@@ -159,10 +104,12 @@ public class AStarPathFinder {
     private static Array<Vector2> reconstructPath(Node end) {
         Array<Vector2> path = new Array<>();
         Node current = end;
+
         while (current != null) {
             path.add(current.position.cpy());
             current = current.parent;
         }
+
         path.reverse();
         return path;
     }
