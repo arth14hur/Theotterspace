@@ -2,6 +2,7 @@ package com.T_jav_502.Theotterspace.units;
 
 import com.T_jav_502.Theotterspace.teams.*;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
@@ -95,6 +96,49 @@ public abstract class aUnit extends Sprite {
 
         this.moved = true;
         return path;
+    }
+
+    public Array<Vector2> whereCanWalk(TiledMapTileLayer layer, boolean atk,Team enemyTeam) {
+        Array<Vector2> output = new Array<>();
+        output.add(coordinates);
+        Array<Vector2> bufferOutput = new Array<>();
+        Array<Vector2> atkOutput = new Array<>();
+        Array<Vector2> directions = new Array<>();
+        directions.add(new Vector2(0,-1));
+        directions.add(new Vector2(0,1));
+        directions.add(new Vector2(-1, 0));
+        directions.add(new Vector2(1, 0));
+        Vector2 bufferPosition = new Vector2();
+
+        int mvt = 0;
+        if (!moved) mvt = movement;
+        if (atk && !hasAttacked()) mvt += range;
+
+        while (mvt > 0) {
+            for (Vector2 position : output) {
+                for (Vector2 direction : directions) {
+                    bufferPosition.x = direction.x + position.x;
+                    bufferPosition.y = direction.y + position.y;
+
+                    if (layer.getCell((int) bufferPosition.x, (int) bufferPosition.y) != null && !output.contains(bufferPosition, false)) {
+                        if (layer.getCell((int) bufferPosition.x, (int) bufferPosition.y).getTile().getProperties().get("walkable", Boolean.class)) {
+                            bufferOutput.add(new Vector2(bufferPosition.x, bufferPosition.y));
+                        }
+                    }
+                }
+            }
+            for (Vector2 out : bufferOutput) {
+                if (!output.contains(out, false)) {
+                    output.add(out);
+                    if (atk && mvt <= range && !atkOutput.contains(out, false)) atkOutput.add(out);
+                }
+            }
+            bufferOutput.clear();
+            mvt --;
+        }
+        output.removeIndex(0);
+        if (atk) return atkOutput;
+        else return output;
     }
 
     @Override

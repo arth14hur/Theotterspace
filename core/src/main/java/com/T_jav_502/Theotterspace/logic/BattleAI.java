@@ -10,14 +10,14 @@ import com.badlogic.gdx.utils.Array;
 public class BattleAI {
 
     private final BattleManager battleManager;
-    private final TiledMapTileLayer collisionLayer;
+    private final TiledMapTileLayer floorLayer;
 
     // Timer pour donner un rythme humain aux actions
     private float timer = 0;
 
-    public BattleAI(BattleManager battleManager, TiledMapTileLayer collisionLayer) {
+    public BattleAI(BattleManager battleManager, TiledMapTileLayer floorLayer) {
         this.battleManager = battleManager;
-        this.collisionLayer = collisionLayer;
+        this.floorLayer = floorLayer;
     }
 
     public void update(float delta) {
@@ -168,9 +168,9 @@ public class BattleAI {
     }
 
     private aUnit AItarget(aUnit attacker) {
-        // Recalcule la vraie portée d'attaque
-        Array<Vector2> range = MovementCalculator.getAccessibleTiles(attacker, collisionLayer, true);
         aUnit selctedTarget = null;
+        Array<Vector2> range = attacker.whereCanWalk(floorLayer, true, battleManager.getOpponentTeam());
+        aUnit bestTarget = null;
         float lowestHp = Float.MAX_VALUE;
 
         for (Team t : battleManager.getTeams()) {

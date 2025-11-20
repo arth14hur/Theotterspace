@@ -60,10 +60,10 @@ public class AStarPathFinder {
         return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     }
 
-    private static boolean isBlocked(Vector2 pos, TiledMapTileLayer layer,Team enemyTeam) {
+    private static boolean isBlocked(Vector2 pos, TiledMapTileLayer layer, Team enemyTeam) {
 
         for (aUnit unit : enemyTeam.getUnits()) {
-            if (unit.getCoordinates().epsilonEquals(pos)) return false;
+            if (unit.getCoordinates().epsilonEquals(pos)) return true;
         }
         return !isWalkable(pos, layer);
     }

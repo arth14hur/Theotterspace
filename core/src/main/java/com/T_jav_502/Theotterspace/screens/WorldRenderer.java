@@ -35,7 +35,6 @@ public class WorldRenderer implements Disposable {
         this.battleManager = battleManager;
         this.selector = selector;
 
-        // Initialisation du ShapeRenderer
         this.shapeRenderer = new ShapeRenderer();
 
         // Chargement des textures
@@ -47,22 +46,22 @@ public class WorldRenderer implements Disposable {
     public void render(OrthographicCamera camera) {
         mapRenderer.setView(camera);
 
-        // 1. Dessiner la carte
+        // Rendering of the Tiles and objects of the map
         mapRenderer.render(new int[]{0, 1, 2});
 
         mapRenderer.getBatch().begin();
 
-        // 2. Dessiner les zones (vert/rouge)
+        // Displays the range around a unit
         drawRanges();
 
-        // 3. Dessiner le sélecteur
+        // displays selector
         if (selector.isDisplay()) {
             mapRenderer.getBatch().draw(textureSelector,
                 selector.getCoordinates().x * 32,
                 selector.getCoordinates().y * 32);
         }
 
-        // 4. Dessiner les unités
+        //
         for (Team team : battleManager.getTeams()) {
             for (aUnit unit : team.getUnits()) {
                 unit.draw(mapRenderer.getBatch());
