@@ -110,11 +110,12 @@ public class BattleManager {
     public void actionAtTile(Vector2 position) {
         if (selectedUnit == null || movingUnit != null) return;
 
+        // attack check if selected unit exists and can be attacked
         aUnit targetUnit = getUnitAt(position);
-        if (targetUnit != null) {
-            if (targetUnit.getTeam() != getCurrentTeam() && !selectedUnit.hasAttacked()
-                && contains(attackRange, position)) {
-                performAttack(selectedUnit, targetUnit);
+        if (targetUnit != null && selectedUnit.isAtRange(targetUnit)) {
+            if (targetUnit.getTeam() != getCurrentTeam() && !selectedUnit.hasAttacked() && contains(attackRange, position)) {
+                selectedUnit.attack(targetUnit);
+                finishUnitTurn(selectedUnit);
             }
         } else {
             if (contains(movementRange, position) && !selectedUnit.hasMoved()) {
@@ -152,16 +153,7 @@ public class BattleManager {
 
     // --- Logique Interne ---
 
-    private void performAttack(aUnit attacker, aUnit defender) {
-        defender.receiveDamage(attacker.getAttack());
-        attacker.setAttacked(true);
-        attacker.setMoved(true);
 
-        if (defender.getHp() <= 0) {
-            defender.getTeam().removeUnit(defender);
-        }
-        finishUnitTurn(attacker);
-    }
 
     private void finishUnitTurn(aUnit unit) {
         unit.setColor(Color.GRAY);

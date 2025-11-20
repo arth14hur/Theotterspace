@@ -7,6 +7,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 
+import static java.lang.Math.abs;
+
 public abstract class aUnit extends Sprite {
     protected int hp;
     protected int maxHp; // Stocke la vie maximale pour le calcul de la barre de vie
@@ -66,6 +68,17 @@ public abstract class aUnit extends Sprite {
         if (hp<=0) hp = 0;
     }
 
+    public void attack(aUnit defender) {
+        defender.receiveDamage(getAttack());
+        setAttacked(true);
+        setMoved(true);
+
+        if (defender.getHp() <= 0) {
+            defender.getTeam().removeUnit(defender);
+        }
+    }
+
+
     /**
      * Gère l'animation de déplacement
      */
@@ -76,7 +89,7 @@ public abstract class aUnit extends Sprite {
         float targetX = target.x;
         float targetY = target.y;
 
-        if (Math.abs(coordinates.x - targetX) < 0.1f && Math.abs(coordinates.y - targetY) < 0.1f) {
+        if (abs(coordinates.x - targetX) < 0.1f && abs(coordinates.y - targetY) < 0.1f) {
             this.coordinates.set(targetX, targetY);
             setX(targetX);
             setY(targetY);
@@ -126,7 +139,8 @@ public abstract class aUnit extends Sprite {
                     bufferPosition.x = direction.x + position.x;
                     bufferPosition.y = direction.y + position.y;
 
-                    if (layer.getCell((int) bufferPosition.x, (int) bufferPosition.y) != null && !output.contains(bufferPosition, false)) {
+                    if (layer.getCell((int) bufferPosition.x, (int) bufferPosition.y) != null
+                        && !output.contains(bufferPosition, false)) {
                         if (layer.getCell((int) bufferPosition.x, (int) bufferPosition.y).getTile().getProperties().get("walkable", Boolean.class)) {
                             if (enemyPositions.contains(bufferPosition, false)) {
                                 if (!atkOutput.contains(bufferPosition, false))atkOutput.add(bufferPosition.cpy());
@@ -148,6 +162,13 @@ public abstract class aUnit extends Sprite {
         output.removeIndex(0);
         if (atk) return atkOutput;
         else return output;
+    }
+
+    public boolean isAtRange(aUnit target) {
+        Vector2 targetPosition = target.getCoordinates();
+        int distance = (int) abs(targetPosition.x - coordinates.x);
+        distance += (int) abs(targetPosition.y - coordinates.y);
+        return distance <= range;
     }
 
     @Override
