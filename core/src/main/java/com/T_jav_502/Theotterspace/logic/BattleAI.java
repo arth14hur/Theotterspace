@@ -1,6 +1,5 @@
 package com.T_jav_502.Theotterspace.logic;
 
-import com.T_jav_502.Theotterspace.PathFinder.AStarPathFinder;
 import com.T_jav_502.Theotterspace.teams.Team;
 import com.T_jav_502.Theotterspace.units.aUnit;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -15,7 +14,6 @@ public class BattleAI {
 
     // Timer pour donner un rythme humain aux actions
     private float timer = 0;
-    private final float ACTION_DELAY = 0.8f;
 
     public BattleAI(BattleManager battleManager, TiledMapTileLayer collisionLayer) {
         this.battleManager = battleManager;
@@ -24,43 +22,44 @@ public class BattleAI {
 
     public void update(float delta) {
         timer += delta;
-        if (timer >= ACTION_DELAY) {
-            playTurn();
+        float delay = 0.8f;
+        if (timer >= delay) {
+            botTurn();
             timer = 0;
         }
     }
 
-    private void playTurn() {
+    private void botTurn() {
         // 1. Si une unité est déjà sélectionnée (après un mouvement), elle doit finir son action
         if (battleManager.getSelectedUnit() != null) {
-            finishUnitAction(battleManager.getSelectedUnit());
+            AIaction(battleManager.getSelectedUnit());
             return;
         }
 
         // 2. Trouver une unité disponible
-        aUnit bestUnit = null;
+        aUnit chooseUnit = null;
         // On mélange la liste pour ne pas toujours jouer les unités dans le même ordre (Imprévisibilité)
         Array<aUnit> availableUnits = new Array<>(battleManager.getCurrentTeam().getUnits());
         availableUnits.shuffle();
 
         for (aUnit unit : availableUnits) {
             if (!unit.hasMoved() && !unit.hasAttacked()) {
-                bestUnit = unit;
+                chooseUnit = unit;
                 break;
             }
         }
 
         // 3. Si plus personne ne peut jouer, on passe le tour
-        if (bestUnit == null) {
+        if (chooseUnit == null) {
             battleManager.endTurn();
             return;
         }
 
         // 4. Calculer le meilleur mouvement pour cette unité
-        evaluateAndAct(bestUnit);
+        AIEvaluatingSystem(chooseUnit);
     }
 
-    private void evaluateAndAct(aUnit unit) {
+    private void AIEvaluatingSystem(aUnit unit) {
         // On sélectionne l'unité dans le moteur
         battleManager.forceSelectUnit(unit);
 
@@ -69,31 +68,31 @@ public class BattleAI {
         if(moves == null) moves = new Array<>();
         moves.add(unit.getCoordinates());
 
-        Vector2 bestTile = null;
-        float bestScore = -Float.MAX_VALUE;
+        Vector2 chooseTile = null;
+        float scoreAI = -Float.MAX_VALUE;
 
         // --- SYSTÈME DE SCORE (Utility AI) ---
         for (Vector2 tile : moves) {
             // On vérifie que la case est libre (ou que c'est moi-même)
-            aUnit occupier = getUnitAt(tile);
+            aUnit occupier = getUnitposition(tile);
             if (occupier != null && occupier != unit) continue;
 
-            float score = calculateTileScore(unit, tile);
+            float score = tileScore(unit, tile);
 
-            if (score > bestScore) {
-                bestScore = score;
-                bestTile = tile;
+            if (score > scoreAI) {
+                scoreAI = score;
+                chooseTile = tile;
             }
         }
 
         // 5. Exécuter l'action
-        if (bestTile != null) {
+        if (chooseTile != null) {
             // Si la meilleure case est la case actuelle, on passe directement à l'attaque/fin
-            if (bestTile.equals(unit.getCoordinates())) {
-                finishUnitAction(unit);
+            if (chooseTile.equals(unit.getCoordinates())) {
+                AIaction(unit);
             } else {
                 // Sinon, on demande au BattleManager de bouger
-                battleManager.actionAtTile(bestTile);
+                battleManager.actionAtTile(chooseTile);
             }
         } else {
             // Cas de secours
@@ -105,49 +104,49 @@ public class BattleAI {
      * Calcule l'intérêt d'une case donnée.
      * C'est ici que réside "l'intelligence".
      */
-    private float calculateTileScore(aUnit myUnit, Vector2 tilePos) {
+    private float tileScore(aUnit AIUnit, Vector2 tilePossition) {
         float score = 0;
 
         // Facteur aléatoire pour rendre l'IA moins prévisible (Ex: ne prend pas toujours le chemin optimal parfait)
         score += MathUtils.random(-5f, 5f);
 
         // --- CRITÈRE 1 : Distance vers l'ennemi le plus proche (Se rapprocher) ---
-        aUnit closestEnemy = null;
-        float minDst = Float.MAX_VALUE;
+        aUnit playerUnit = null;
+        float minDistance = Float.MAX_VALUE;
 
         for (Team t : battleManager.getTeams()) {
-            if (t == myUnit.getTeam()) continue;
+            if (t == AIUnit.getTeam()) continue;
             for (aUnit enemy : t.getUnits()) {
-                float dst = tilePos.dst(enemy.getCoordinates());
-                if (dst < minDst) {
-                    minDst = dst;
-                    closestEnemy = enemy;
+                float dst = tilePossition.dst(enemy.getCoordinates());
+                if (dst < minDistance) {
+                    minDistance = dst;
+                    playerUnit = enemy;
                 }
             }
         }
 
-        if (closestEnemy != null) {
+        if (playerUnit != null) {
             // Moins on est loin, plus le score est haut. (MaxMapSize ~ 50, donc score ~ -dist)
-            score -= minDst * 2;
+            score -= minDistance * 2;
         }
 
         // --- CRITÈRE 2 : Possibilité d'attaquer (Très important) ---
         // On simule "si j'étais sur cette case, qui pourrais-je attaquer ?"
         // Note : On fait une simulation simplifiée de la portée ici pour la performance
-        if (closestEnemy != null) {
-            float distToEnemy = tilePos.dst(closestEnemy.getCoordinates());
+        if (playerUnit != null) {
+            float distancePlayer = tilePossition.dst(playerUnit.getCoordinates());
             // Si l'ennemi est à portée d'attaque (approximatif via distance euclidienne vs range)
-            if (distToEnemy <= myUnit.getRange() + 0.5f) { // +0.5 pour la marge d'erreur float/grid
+            if (distancePlayer <= AIUnit.getRange() + 0.5f) { // +0.5 pour la marge d'erreur float/grid
                 score += 100; // Gros bonus si on peut taper
 
                 // --- CRITÈRE 3 : Tuer un ennemi (Priorité absolue) ---
-                int damage = Math.max(1, myUnit.getAttack() - closestEnemy.getDefense());
-                if (closestEnemy.getHp() - damage <= 0) {
+                int damage = Math.max(1, AIUnit.getAttack() - playerUnit.getDefense());
+                if (playerUnit.getHp() - damage <= 0) {
                     score += 200; // Bonus KILL
                 }
 
                 // --- CRITÈRE 4 : Taper les unités faibles ---
-                score += (float)(closestEnemy.getMaxHp() - closestEnemy.getHp()) * 2;
+                score += (float)(playerUnit.getMaxHp() - playerUnit.getHp()) * 2;
             }
         }
 
@@ -157,9 +156,9 @@ public class BattleAI {
         return score;
     }
 
-    private void finishUnitAction(aUnit unit) {
+    private void AIaction(aUnit unit) {
         // Une fois déplacé, l'IA regarde si elle peut attaquer quelqu'un
-        aUnit target = findBestTarget(unit);
+        aUnit target = AItarget(unit);
 
         if (target != null) {
             battleManager.actionAtTile(target.getCoordinates()); // Attaque !
@@ -168,10 +167,10 @@ public class BattleAI {
         }
     }
 
-    private aUnit findBestTarget(aUnit attacker) {
+    private aUnit AItarget(aUnit attacker) {
         // Recalcule la vraie portée d'attaque
         Array<Vector2> range = MovementCalculator.getAccessibleTiles(attacker, collisionLayer, true);
-        aUnit bestTarget = null;
+        aUnit selctedTarget = null;
         float lowestHp = Float.MAX_VALUE;
 
         for (Team t : battleManager.getTeams()) {
@@ -181,16 +180,16 @@ public class BattleAI {
                     // Stratégie : Attaquer l'unité la plus faible à portée
                     if (enemy.getHp() < lowestHp) {
                         lowestHp = enemy.getHp();
-                        bestTarget = enemy;
+                        selctedTarget = enemy;
                     }
                 }
             }
         }
-        return bestTarget;
+        return selctedTarget;
     }
 
     // Helpers
-    private aUnit getUnitAt(Vector2 pos) {
+    private aUnit getUnitposition(Vector2 pos) {
         for (Team t : battleManager.getTeams()) {
             for (aUnit u : t.getUnits()) {
                 if ((int)u.getCoordinates().x == (int)pos.x && (int)u.getCoordinates().y == (int)pos.y) return u;
