@@ -1,7 +1,6 @@
 package com.T_jav_502.Theotterspace.screens;
 
 import com.T_jav_502.Theotterspace.Main;
-import com.T_jav_502.Theotterspace.Map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -22,7 +21,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
  * It provides the player with two main options by clicking on a background image:
  * </p>
  * <ul>
- * <li><b>Start Game</b> — loads a {@link TiledMap} and a {@link Map} instance, then transitions to {@link GameScreen}.</li>
+ * <li><b>Start Game</b> — loads a {@link TiledMap} instance, then transitions to {@link GameScreen}.</li>
  * <li><b>Quit</b> — exits the application.</li>
  * </ul>
  *

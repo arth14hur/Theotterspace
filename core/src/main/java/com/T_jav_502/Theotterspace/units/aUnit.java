@@ -63,7 +63,7 @@ public abstract class aUnit extends Sprite {
     public void receiveDamage(int damage){
         int actualDamage = Math.max(1, damage - defense);
         hp -= actualDamage;
-        System.out.println("Unit took " + actualDamage + " damage. HP left: " + hp);
+        if (hp<=0) hp = 0;
     }
 
     /**
@@ -104,11 +104,17 @@ public abstract class aUnit extends Sprite {
         Array<Vector2> bufferOutput = new Array<>();
         Array<Vector2> atkOutput = new Array<>();
         Array<Vector2> directions = new Array<>();
+        Array<Vector2> enemyPositions = new Array<>();
+        Vector2 bufferPosition = new Vector2();
+
+        for (aUnit unit : enemyTeam.getUnits()) {
+            enemyPositions.add(unit.getCoordinates());
+        }
+
         directions.add(new Vector2(0,-1));
         directions.add(new Vector2(0,1));
         directions.add(new Vector2(-1, 0));
         directions.add(new Vector2(1, 0));
-        Vector2 bufferPosition = new Vector2();
 
         int mvt = 0;
         if (!moved) mvt = movement;
@@ -122,7 +128,10 @@ public abstract class aUnit extends Sprite {
 
                     if (layer.getCell((int) bufferPosition.x, (int) bufferPosition.y) != null && !output.contains(bufferPosition, false)) {
                         if (layer.getCell((int) bufferPosition.x, (int) bufferPosition.y).getTile().getProperties().get("walkable", Boolean.class)) {
-                            bufferOutput.add(new Vector2(bufferPosition.x, bufferPosition.y));
+                            if (enemyPositions.contains(bufferPosition, false)) {
+                                if (!atkOutput.contains(bufferPosition, false))atkOutput.add(bufferPosition.cpy());
+                            }
+                            else bufferOutput.add(new Vector2(bufferPosition.cpy()));
                         }
                     }
                 }
