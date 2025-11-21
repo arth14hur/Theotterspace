@@ -29,7 +29,18 @@ public class Team {
     }
 
     public Array<aUnit> getUnits() { return units; }
+
     public Species getCurentSpecies() { return curentSpecies; }
+
+    public int getUnitCount() {
+        return units.size;
+    }
+
+    public boolean isDefeated() {
+        return units.size == 0;
+    }
+
+
 
     // Getter pour l'IA
     public boolean isAi() { return isAi; }
