@@ -14,36 +14,29 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class GameUI implements Disposable {
 
     private final Stage stage;
     private final ShapeRenderer shapeRenderer;
     private final BitmapFont font;
-
-    // Éléments du menu PAUSE
+    private final ScreenViewport uiViewport;
     private Label pauseLabel;
     private TextButton continueButton, quitButton;
-
-    // Éléments du HUD (Jeu)
     private TextButton endTurnButton;
 
     public GameUI(Main main, GameScreen gameScreen, FitViewport viewport) {
-        this.stage = new Stage(viewport);
+        this.uiViewport = new ScreenViewport();
+        this.stage = new Stage(uiViewport);
         this.shapeRenderer = new ShapeRenderer();
         this.font = new BitmapFont();
-
-        // On crée le style une seule fois pour l'utiliser partout
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.font = font;
-
         createPauseMenu(main, gameScreen, buttonStyle);
         createHUD(gameScreen, buttonStyle);
     }
 
-    /**
-     * Crée le menu de pause (centré)
-     */
     private void createPauseMenu(Main main, GameScreen gameScreen, TextButton.TextButtonStyle buttonStyle) {
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
 
@@ -79,44 +72,35 @@ public class GameUI implements Disposable {
         stage.addActor(pauseTable);
     }
 
-    /**
-     * Crée l'interface de jeu (HUD) visible pendant la partie
-     */
     private void createHUD(GameScreen gameScreen, TextButton.TextButtonStyle buttonStyle) {
         Table hudTable = new Table();
         hudTable.setFillParent(true);
-        hudTable.bottom().right(); // Aligner le contenu en bas à droite
+        hudTable.bottom().right();
 
-        endTurnButton = new TextButton("Fin du Tour", buttonStyle);
-        endTurnButton.getLabel().setFontScale(1.2f); // Un peu plus gros
+        endTurnButton = new TextButton("Next Turn", buttonStyle);
+        endTurnButton.getLabel().setFontScale(1.2f);
 
         endTurnButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // On ne déclenche l'action que si le jeu n'est pas en pause
                 if (!gameScreen.isPaused()) {
                     gameScreen.endTurn();
                 }
             }
         });
-
-        // Ajoute le bouton avec une marge (padding) de 20 pixels
         hudTable.add(endTurnButton).pad(20);
-
         stage.addActor(hudTable);
     }
 
     public void setPaused(boolean paused) {
-        // Affiche/Cache le menu pause
         pauseLabel.setVisible(paused);
         continueButton.setVisible(paused);
         quitButton.setVisible(paused);
-
-        // Inversement pour le bouton de fin de tour (on le cache quand c'est en pause)
         endTurnButton.setVisible(!paused);
     }
 
     public void render(float delta, boolean isPaused) {
+        stage.getViewport().apply();
         if (isPaused) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
